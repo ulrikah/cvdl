@@ -9,8 +9,8 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
     """
     Args:
         X: images of shape [batch size, 785]
-        outputs: outputs of model of shape: [batch size, 1]
         targets: labels/targets of each image of shape: [batch size, 1]
+        model: model of class BinaryModel
     Returns:
         Accuracy (float)
     """
@@ -112,4 +112,3 @@ utils.plot_loss(val_accuracy, "Validation Accuracy")
 plt.legend()
 plt.savefig("binary_train_accuracy.png")
 plt.show()
-
