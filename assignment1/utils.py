@@ -30,8 +30,10 @@ def train_val_split(X: np.ndarray, Y: np.ndarray, val_percentage: float):
     train_size = int(X.shape[0] * (1 - val_percentage))
     idx_train = idx[:train_size]
     idx_val = idx[train_size:]
+
     X_train, Y_train = X[idx_train], Y[idx_train]
     X_val, Y_val = X[idx_val], Y[idx_val]
+
     return X_train, Y_train, X_val, Y_val
 
 
