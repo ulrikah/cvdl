@@ -12,7 +12,8 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     Returns:
         Cross entropy error (float)
     """
-    assert targets.shape == outputs.shape
+    assert targets.shape == outputs.shape,\
+        f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
     ce = targets * np.log(outputs)
     raise NotImplementedError
 
@@ -49,7 +50,8 @@ class SoftmaxModel:
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         self.grad = np.zeros_like(self.w)
-        assert self.grad.shape == self.w.shape
+        assert self.grad.shape == self.w.shape,\
+            f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
     def zero_grad(self) -> None:
         self.grad = None
@@ -89,7 +91,7 @@ def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarra
             difference = gradient_approximation - model.grad[i, j]
             assert abs(difference) <= epsilon**2,\
                 f"Calculated gradient is incorrect. " \
-                f"Approximation: {gradient_approximation}, actual gradient: {model.grad[i,0]}\n"\
+                f"Approximation: {gradient_approximation}, actual gradient: {model.grad[i, j]}\n"\
                 f"If this test fails there could be errors in your cross entropy loss function, " \
                 f"forward function or backward function"
 

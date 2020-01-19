@@ -89,7 +89,7 @@ def gradient_approximation_test(model: BinaryModel, X: np.ndarray, Y: np.ndarray
         difference = gradient_approximation - model.grad[i, 0]
         assert abs(difference) <= epsilon**2,\
             f"Calculated gradient is incorrect. " \
-            f"Approximation: {gradient_approximation}, actual gradient: {model.grad[i,0]}\n" \
+            f"Approximation: {gradient_approximation}, actual gradient: {model.grad[i, 0]}\n" \
             f"If this test fails there could be errors in your cross entropy loss function, " \
             f"forward function or backward function"
 
