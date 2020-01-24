@@ -108,7 +108,6 @@ plt.show()
 #plt.ylim([0.93, .99])
 utils.plot_loss(train_accuracy, "Training Accuracy")
 utils.plot_loss(val_accuracy, "Validation Accuracy")
-
 plt.legend()
 plt.savefig("binary_train_accuracy.png")
 plt.show()
