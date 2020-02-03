@@ -5,7 +5,7 @@ import pdb
 np.random.seed(1)
 
 
-def pre_process_images(X: np.ndarray):
+def pre_process_images(X: np.ndarray, mean, stddev):
     """
     Args:
         X: images of shape [batch size, 784] in the range (0, 255)
@@ -26,7 +26,6 @@ def stddev(x):
 
 
 def normalize(x, mean, stddev):
-    x = x / 255  # compressing to the range [0, 1]
     return (x - mean) / stddev
 
 
@@ -91,7 +90,14 @@ class SoftmaxModel:
         Returns:
             y: output of model with shape [batch size, num_outputs]
         """
-        return None
+        a = X.copy()
+        for w in self.ws:
+            z = np.dot(a, w)
+            a = self.softmax(z)
+        return a
+
+    def softmax(self, z):
+        return np.exp(z) / np.sum(np.exp(z), axis=1, keepdims=True)
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
                  targets: np.ndarray) -> None:
@@ -103,9 +109,21 @@ class SoftmaxModel:
         """
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
+
+        N = targets.shape[0]
+        K = targets.shape[1]
+        a = self.softmax(np.dot(X, self.ws[0]))
+        delta_k = - (targets - outputs)
+        d_k = (1 / N) * np.dot(a.T, delta_k)
+
+        # how does this work...
+        d_j = np.dot(X.T, np.dot(a, np.dot(delta_k, self.ws[1].T).T))
+
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
         self.grads = []
+        self.grads.append(d_j)
+        self.grads.append(d_k)
 
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
