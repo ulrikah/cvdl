@@ -1,6 +1,7 @@
 import numpy as np
 import utils
 import typing
+import pdb
 np.random.seed(1)
 
 
@@ -9,24 +10,50 @@ def pre_process_images(X: np.ndarray):
     Args:
         X: images of shape [batch size, 784] in the range (0, 255)
     Returns:
-        X: images of shape [batch size, 785]
+        X: images of shape [batch size, 785] in the range (0, 1)
     """
-    assert X.shape[1] == 784,\
-        f"X.shape[1]: {X.shape[1]}, should be 784"
+    X = normalize(X, mean, stddev)
+    X = np.concatenate((X, np.ones((X.shape[0], 1))), axis=1)
     return X
 
 
-def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
+def mean(x):
+    return np.mean(x)
+
+
+def stddev(x):
+    return np.std(x)
+
+
+def normalize(x, mean, stddev):
+    x = x / 255  # compressing to the range [0, 1]
+    return (x - mean) / stddev
+
+
+def one_hot_encode(Y: np.ndarray, num_classes: int):
     """
     Args:
-        targets: labels/targets of each image of shape: [batch size, num_classes]
-        outputs: outputs of model of shape: [batch size, num_classes]
+        Y: shape [Num examples, 1]
+        num_classes: Number of classes to use for one-hot encoding
+    Returns:
+        Y: shape [Num examples, num classes]
+    """
+    # Borrowed from @D.Samchuk: https://stackoverflow.com/a/49217762
+    return np.eye(num_classes, dtype=int)[Y.reshape(-1)]
+
+
+def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
+    """
+    Args:
+        targets: labels/targets of each image of shape: [batch size, 1]
+        outputs: outputs of model of shape: [batch size, 1]
     Returns:
         Cross entropy error (float)
     """
+    ce = (-1) * np.sum(targets * np.log(outputs) + (1 - targets) * np.log(1 - outputs))
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    raise NotImplementedError
+    return ce
 
 
 class SoftmaxModel:
@@ -38,7 +65,7 @@ class SoftmaxModel:
                  use_improved_weight_init: bool  # Task 3c hyperparameter
                  ):
         # Define number of input nodes
-        self.I = None
+        self.I = 785
         self.use_improved_sigmoid = use_improved_sigmoid
 
         # Define number of output nodes
@@ -88,17 +115,6 @@ class SoftmaxModel:
         self.grads = [None for i in range(len(self.ws))]
 
 
-def one_hot_encode(Y: np.ndarray, num_classes: int):
-    """
-    Args:
-        Y: shape [Num examples, 1]
-        num_classes: Number of classes to use for one-hot encoding
-    Returns:
-        Y: shape [Num examples, num classes]
-    """
-    raise NotImplementedError
-
-
 def gradient_approximation_test(
         model: SoftmaxModel, X: np.ndarray, Y: np.ndarray):
     """
@@ -139,7 +155,9 @@ if __name__ == "__main__":
         f"Expected the vector to be [0,0,0,1,0,0,0,0,0,0], but got {Y}"
 
     X_train, Y_train, *_ = utils.load_full_mnist(0.1)
-    X_train = pre_process_images(X_train)
+    mean = mean(X_train)
+    stddev = stddev(X_train)
+    X_train = pre_process_images(X_train, mean, stddev)
     Y_train = one_hot_encode(Y_train, 10)
     assert X_train.shape[1] == 785,\
         f"Expected X_train to have 785 elements per image. Shape was: {X_train.shape}"
