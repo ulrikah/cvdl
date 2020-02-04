@@ -31,7 +31,4 @@ if __name__ == "__main__":
     # Gradient approximation check for 100 images
     X_train = X_train[:100]
     Y_train = Y_train[:100]
-    for i in range(2):
-        if i != 0:
-            gradient_approximation_test(model, X_train, Y_train)
-        model.ws = [np.random.randn(*w.shape) for w in model.ws]
+    gradient_approximation_test(model, X_train, Y_train)
