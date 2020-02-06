@@ -6,12 +6,7 @@ np.random.seed(1)
 
 
 def pre_process_images(X: np.ndarray, mean, stddev):
-    """
-    Args:
-        X: images of shape [batch size, 784] in the range (0, 255)
-    Returns:
-        X: images of shape [batch size, 785] in the range (0, 1)
-    """
+
     X = normalize(X, mean, stddev)
     X = np.concatenate((X, np.ones((X.shape[0], 1))), axis=1)
     return X
@@ -29,30 +24,26 @@ def normalize(x, mean, stddev):
     return (x - mean) / stddev
 
 
+def sigmoid(z): 
+    return 1/(1.0+np.exp(-z))
+
+
+def sigmoid_prime(z):
+	return sigmoid(z)*(1-sigmoid(z))
+
 def one_hot_encode(Y: np.ndarray, num_classes: int):
-    """
-    Args:
-        Y: shape [Num examples, 1]
-        num_classes: Number of classes to use for one-hot encoding
-    Returns:
-        Y: shape [Num examples, num classes]
-    """
+
     # Borrowed from @D.Samchuk: https://stackoverflow.com/a/49217762
     return np.eye(num_classes, dtype=int)[Y.reshape(-1)]
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
-    """
-    Args:
-        targets: labels/targets of each image of shape: [batch size, 1]
-        outputs: outputs of model of shape: [batch size, 1]
-    Returns:
-        Cross entropy error (float)
-    """
-    ce = (-1) * np.sum(targets * np.log(outputs) + (1 - targets) * np.log(1 - outputs))
+
+    N,K=targets.shape
+    cross_error= targets*np.log(outputs)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return ce
+    return -np.mean(cross_error)
 
 
 class SoftmaxModel:
@@ -66,12 +57,14 @@ class SoftmaxModel:
         # Define number of input nodes
         self.I = 785
         self.use_improved_sigmoid = use_improved_sigmoid
-
         # Define number of output nodes
         # neurons_per_layer = [64, 10] indicates that we will have two layers:
         # A hidden layer with 64 neurons and a output layer with 10 neurons.
         self.neurons_per_layer = neurons_per_layer
-
+        #Contains  values of z of the hidden layer
+        self.zs= []
+        #Same as before but the activation
+        self.activations=[]
         # Initialize the weights
         self.ws = []
         prev = self.I
@@ -84,17 +77,13 @@ class SoftmaxModel:
         self.grads = [None for i in range(len(self.ws))]
 
     def forward(self, X: np.ndarray) -> np.ndarray:
-        """
-        Args:
-            X: images of shape [batch size, 785]
-        Returns:
-            y: output of model with shape [batch size, num_outputs]
-        """
-        a = X.copy()
-        for w in self.ws:
-            z = np.dot(a, w)
-            a = self.softmax(z)
-        return a
+    	#the first propagation is always with the sigmoid function
+    	z= np.dot(X,self.ws[0])
+    	self.zs.append(z)
+    	activation= sigmoid(z)
+    	self.activations.append(activation)
+    	a_k=self.softmax(np.dot(activation,self.ws[1]))
+    	return a_k
 
     def softmax(self, z):
         return np.exp(z) / np.sum(np.exp(z), axis=1, keepdims=True)
@@ -112,18 +101,15 @@ class SoftmaxModel:
 
         N = targets.shape[0]
         K = targets.shape[1]
-        a = self.softmax(np.dot(X, self.ws[0]))
-        delta_k = - (targets - outputs)
-        d_k = (1 / N) * np.dot(a.T, delta_k)
-
-        # how does this work...
-        d_j = np.dot(X.T, np.dot(a, np.dot(delta_k, self.ws[1].T).T))
-
+        cost_derivate = -(targets - outputs) #the error for the output layer
+        delta=np.dot(self.activations[-1].transpose(),cost_derivate) #error multiplied by activation of previous layer
+        cost_hiddenL=np.dot(cost_derivate,self.ws[1].transpose())*sigmoid_prime(self.zs[-1])
+        delta_hiddenL=np.dot(X.transpose(),cost_hiddenL)
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
         self.grads = []
-        self.grads.append(d_j)
-        self.grads.append(d_k)
+        self.grads.append(delta_hiddenL/(N*K))
+        self.grads.append(delta)
 
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
