@@ -70,12 +70,13 @@ def train(
             model.ws[-1] = model.ws[-1] - learning_rate * model.grads[-1]
             model.ws[-2] = model.ws[-2] - learning_rate * model.grads[-2]
 
-            _train_loss = cross_entropy_loss(Y_batch, outputs)
-            train_loss[global_step] = _train_loss
-
             if (global_step % num_steps_per_val) == 0:
-                outputs_val = model.forward(X_val)
-                _val_loss = cross_entropy_loss(Y_val, outputs_val)
+                _outputs_train = model.forward(X_train)
+                _train_loss = cross_entropy_loss(Y_train, _outputs_train)
+                train_loss[global_step] = _train_loss
+
+                _outputs_val = model.forward(X_val)
+                _val_loss = cross_entropy_loss(Y_val, _outputs_val)
                 val_loss[global_step] = _val_loss
 
                 train_accuracy[global_step] = calculate_accuracy(
