@@ -65,6 +65,7 @@ class SoftmaxModel:
         # Define number of input nodes
         self.I = 785
         self.use_improved_sigmoid = use_improved_sigmoid
+        self.use_improved_weight_init = use_improved_weight_init
         # Define number of output nodes
         # neurons_per_layer = [64, 10] indicates that we will have two layers:
         # A hidden layer with 64 neurons and a output layer with 10 neurons.
@@ -79,8 +80,11 @@ class SoftmaxModel:
         for size in self.neurons_per_layer:
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
-            # w = np.zeros(w_shape)
-            w = np.random.uniform(-1, 1, w_shape)
+            if self.use_improved_weight_init:
+                sqrt_fan = np.sqrt(w_shape[0])
+                w = np.random.uniform(-sqrt_fan, sqrt_fan, w_shape)
+            else:
+                w = np.random.uniform(-1, 1, w_shape)
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]

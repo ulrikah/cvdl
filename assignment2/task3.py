@@ -103,9 +103,9 @@ if __name__ == "__main__":
     momentum_gamma = .9  # Task 3 hyperparameter
 
     # Settings for task 3. Keep all to false for task 2.
-    use_shuffle = False
+    use_shuffle = True
     use_improved_sigmoid = True
-    use_improved_weight_init = False
+    use_improved_weight_init = True
     use_momentum = False
 
     #Calibration
