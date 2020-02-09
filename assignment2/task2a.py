@@ -5,8 +5,7 @@ import pdb
 np.random.seed(1)
 
 
-def pre_process_images(X: np.ndarray, mean, stddev):
-
+def pre_process_images(X: np.ndarray, mean = 33.34, stddev = 78.59):
     X = normalize(X, mean, stddev)
     X = np.concatenate((X, np.ones((X.shape[0], 1))), axis=1)
     return X
@@ -20,16 +19,26 @@ def stddev(x):
     return np.std(x)
 
 
-def normalize(x, mean, stddev):
+def normalize(x, mean = 33.34, stddev = 78.59):
     return (x - mean) / stddev
 
 
-def sigmoid(z): 
-    return 1/(1.0+np.exp(-z))
+def sigmoid(z):
+    return 1 / (1.0 + np.exp(-z))
 
 
 def sigmoid_prime(z):
-	return sigmoid(z)*(1-sigmoid(z))
+    return sigmoid(z)*(1 - sigmoid(z))
+
+
+def tanh(z):
+    # suggested version of tanh as suggested by LeCun et al.
+    return 1.7159 * np.tanh(2 * z / 3) + 0.01 * z
+
+def tanh_prime(z):
+    # suggested version of tanh as suggested by LeCun et al.
+    return 2.28787 / (np.cosh(4 * z / 3) + 1) + 0.01
+
 
 def one_hot_encode(Y: np.ndarray, num_classes: int):
 
@@ -38,12 +47,11 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
-
-    N,K=targets.shape
-    cross_error= targets*np.log(outputs)
+    N, K = targets.shape
+    cross_error = targets * np.log(outputs)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return -np.mean(cross_error)
+    return - (1 / N ) * np.sum(cross_error)
 
 
 class SoftmaxModel:
@@ -57,6 +65,7 @@ class SoftmaxModel:
         # Define number of input nodes
         self.I = 785
         self.use_improved_sigmoid = use_improved_sigmoid
+        self.use_improved_weight_init = use_improved_weight_init
         # Define number of output nodes
         # neurons_per_layer = [64, 10] indicates that we will have two layers:
         # A hidden layer with 64 neurons and a output layer with 10 neurons.
@@ -71,44 +80,47 @@ class SoftmaxModel:
         for size in self.neurons_per_layer:
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
-            w = np.zeros(w_shape)
+            if self.use_improved_weight_init:
+                sqrt_fan = np.sqrt(w_shape[0])
+                w = np.random.uniform(-sqrt_fan, sqrt_fan, w_shape)
+            else:
+                w = np.random.uniform(-1, 1, w_shape)
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]
 
     def forward(self, X: np.ndarray) -> np.ndarray:
-    	#the first propagation is always with the sigmoid function
-    	z= np.dot(X,self.ws[0])
-    	self.zs.append(z)
-    	activation= sigmoid(z)
-    	self.activations.append(activation)
-    	a_k=self.softmax(np.dot(activation,self.ws[1]))
-    	return a_k
+        #the first propagation is always with the sigmoid function
+        z = np.dot(X, self.ws[0])
+        self.zs.append(z)
+        if self.use_improved_sigmoid:
+            activation = tanh(z)
+        else:
+            activation = sigmoid(z)
+        self.activations.append(activation)
+        a_k = self.softmax(np.dot(activation, self.ws[1]))
+        return a_k
 
     def softmax(self, z):
         return np.exp(z) / np.sum(np.exp(z), axis=1, keepdims=True)
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
                  targets: np.ndarray) -> None:
-        """
-        Args:
-            X: images of shape [batch size, 785]
-            outputs: outputs of model of shape: [batch size, num_outputs]
-            targets: labels/targets of each image of shape: [batch size, num_classes]
-        """
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
 
-        N = targets.shape[0]
-        K = targets.shape[1]
-        cost_derivate = -(targets - outputs) #the error for the output layer
-        delta=np.dot(self.activations[-1].transpose(),cost_derivate) #error multiplied by activation of previous layer
-        cost_hiddenL=np.dot(cost_derivate,self.ws[1].transpose())*sigmoid_prime(self.zs[-1])
-        delta_hiddenL=np.dot(X.transpose(),cost_hiddenL)
+        N, K = targets.shape
+        cost_derivate = - (targets - outputs) / N # the error for the output layer
+        delta = np.dot(self.activations[-1].T, cost_derivate) # error multiplied by activation of previous layer
+        if self.use_improved_sigmoid:
+            cost_hiddenL = np.dot(cost_derivate, self.ws[1].T) * tanh_prime(self.zs[-1])
+        else:
+            cost_hiddenL = np.dot(cost_derivate, self.ws[1].T) * tanh_prime(self.zs[-1])
+        delta_hiddenL = np.dot(X.T, cost_hiddenL)
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
         self.grads = []
-        self.grads.append(delta_hiddenL/(N*K))
+        self.grads.append(delta_hiddenL)
         self.grads.append(delta)
 
         for grad, w in zip(self.grads, self.ws):
@@ -122,7 +134,7 @@ class SoftmaxModel:
 def gradient_approximation_test(
         model: SoftmaxModel, X: np.ndarray, Y: np.ndarray):
     """
-        Numerical approximation for gradients. Should not be edited. 
+        Numerical approximation for gradients. Should not be edited.
         Details about this test is given in the appendix in the assignment.
     """
     epsilon = 1e-3
