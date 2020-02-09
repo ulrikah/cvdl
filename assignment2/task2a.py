@@ -28,7 +28,16 @@ def sigmoid(z):
 
 
 def sigmoid_prime(z):
-	return sigmoid(z)*(1 - sigmoid(z))
+    return sigmoid(z)*(1 - sigmoid(z))
+
+
+def tanh(z):
+    # suggested version of tanh as suggested by LeCun et al.
+    return 1.7159 * np.tanh(2 * z / 3) + 0.01 * z
+
+def tanh_prime(z):
+    # suggested version of tanh as suggested by LeCun et al.
+    return 2.28787 / (np.cosh(4 * z / 3) + 1) + 0.01
 
 
 def one_hot_encode(Y: np.ndarray, num_classes: int):
@@ -77,13 +86,16 @@ class SoftmaxModel:
         self.grads = [None for i in range(len(self.ws))]
 
     def forward(self, X: np.ndarray) -> np.ndarray:
-    	#the first propagation is always with the sigmoid function
-    	z = np.dot(X, self.ws[0])
-    	self.zs.append(z)
-    	activation = sigmoid(z)
-    	self.activations.append(activation)
-    	a_k = self.softmax(np.dot(activation, self.ws[1]))
-    	return a_k
+        #the first propagation is always with the sigmoid function
+        z = np.dot(X, self.ws[0])
+        self.zs.append(z)
+        if self.use_improved_sigmoid:
+            activation = tanh(z)
+        else:
+            activation = sigmoid(z)
+        self.activations.append(activation)
+        a_k = self.softmax(np.dot(activation, self.ws[1]))
+        return a_k
 
     def softmax(self, z):
         return np.exp(z) / np.sum(np.exp(z), axis=1, keepdims=True)
@@ -96,7 +108,10 @@ class SoftmaxModel:
         N, K = targets.shape
         cost_derivate = - (targets - outputs) / N # the error for the output layer
         delta = np.dot(self.activations[-1].T, cost_derivate) # error multiplied by activation of previous layer
-        cost_hiddenL = np.dot(cost_derivate, self.ws[1].T) * sigmoid_prime(self.zs[-1])
+        if self.use_improved_sigmoid:
+            cost_hiddenL = np.dot(cost_derivate, self.ws[1].T) * tanh_prime(self.zs[-1])
+        else:
+            cost_hiddenL = np.dot(cost_derivate, self.ws[1].T) * tanh_prime(self.zs[-1])
         delta_hiddenL = np.dot(X.T, cost_hiddenL)
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
