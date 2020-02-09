@@ -1,4 +1,5 @@
 data/
+.nfs*
 .vscode
 __pycache__/
 .ipynb_checkpoints/

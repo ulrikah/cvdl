@@ -40,7 +40,6 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     N, K = targets.shape
     cross_error = targets * np.log(outputs)
-    print("CROSS", np.sum(cross_error))
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
     return - (1 / N ) * np.sum(cross_error)
@@ -71,7 +70,8 @@ class SoftmaxModel:
         for size in self.neurons_per_layer:
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
-            w = np.zeros(w_shape)
+            # w = np.zeros(w_shape)
+            w = np.random.uniform(-1, 1, w_shape)
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]

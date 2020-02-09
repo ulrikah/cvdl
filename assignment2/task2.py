@@ -16,8 +16,8 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray,
     Returns:
         Accuracy (float)
     """
-    accuracy = 0
-    return accuracy
+    outputs = model.forward(X)
+    return np.mean(np.argmax(targets, axis=1) == np.argmax(outputs, axis=1))
 
 
 def train(
@@ -41,16 +41,11 @@ def train(
     train_accuracy = {}
     val_accuracy = {}
 
-    #Calibration
-
-    mean = mean(X_train)
-    stddev = stddev(X_train)
-    X_train = pre_process_images(X_train, mean, stddev)
-    X_val =  pre_process_images(X_val, mean, stddev)
-    X_test = pre_process_images(X_test, mean, stddev)
-    Y_train = one_hot_encode(Y_train, 10)
-    Y_val = one_hot_encode(Y_val, 10)
-    Y_test = one_hot_encode(Y_test, 10)
+    neurons_per_layer = [64, 10]
+    use_improved_sigmoid = False
+    use_improved_weight_init = False
+    model = SoftmaxModel(
+        neurons_per_layer, use_improved_sigmoid, use_improved_weight_init)
 
     global_step = 0
     for epoch in range(num_epochs):
@@ -61,12 +56,19 @@ def train(
 
             # Track train / validation loss / accuracy
             # every time we progress 20% through the dataset
-            if (global_step % num_steps_per_val) == 0:
-                _val_loss = 0
-                val_loss[global_step] = _val_loss
+            outputs = model.forward(X_batch)
+            model.backward(X_batch, outputs, Y_batch)
+            # update weigths
+            model.ws[-1] = model.ws[-1] - learning_rate * model.grads[-1]
+            model.ws[-2] = model.ws[-2] - learning_rate * model.grads[-2]
 
-                _train_loss = 0
-                train_loss[global_step] = _train_loss
+            _train_loss = cross_entropy_loss(Y_batch, outputs)
+            train_loss[global_step] = _train_loss
+
+            if (global_step % num_steps_per_val) == 0:
+                outputs_val = model.forward(X_val)
+                _val_loss = cross_entropy_loss(Y_val, outputs_val)
+                val_loss[global_step] = _val_loss
 
                 train_accuracy[global_step] = calculate_accuracy(
                     X_train, Y_train, model)
@@ -97,10 +99,21 @@ if __name__ == "__main__":
     use_improved_weight_init = False
     use_momentum = False
 
+    #Calibration
+    m = mean(X_train)
+    std = stddev(X_train)
+    X_train = pre_process_images(X_train, m, std)
+    X_val =  pre_process_images(X_val, m, std)
+    X_test = pre_process_images(X_test, m, std)
+    Y_train = one_hot_encode(Y_train, 10)
+    Y_val = one_hot_encode(Y_val, 10)
+    Y_test = one_hot_encode(Y_test, 10)
+
     model = SoftmaxModel(
         neurons_per_layer,
         use_improved_sigmoid,
         use_improved_weight_init)
+
     model, train_loss, val_loss, train_accuracy, val_accuracy = train(
         model,
         [X_train, Y_train, X_val, Y_val, X_test, Y_test],
@@ -128,7 +141,7 @@ if __name__ == "__main__":
     # Plot loss
     plt.figure(figsize=(20, 8))
     plt.subplot(1, 2, 1)
-    plt.ylim([0.1, .5])
+    # plt.ylim([0.1, .5])
     utils.plot_loss(train_loss, "Training Loss")
     utils.plot_loss(val_loss, "Validation Loss")
     plt.xlabel("Number of gradient steps")
