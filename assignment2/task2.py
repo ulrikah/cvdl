@@ -2,7 +2,7 @@ import numpy as np
 import utils
 import matplotlib.pyplot as plt
 import typing
-from task2a import cross_entropy_loss, SoftmaxModel, one_hot_encode, pre_process_images
+from task2a import cross_entropy_loss, SoftmaxModel, one_hot_encode, pre_process_images, mean, stddev
 np.random.seed(0)
 
 
@@ -41,6 +41,17 @@ def train(
     train_accuracy = {}
     val_accuracy = {}
 
+    #Calibration
+
+    mean = mean(X_train)
+    stddev = stddev(X_train)
+    X_train = pre_process_images(X_train, mean, stddev)
+    X_val =  pre_process_images(X_val, mean, stddev)
+    X_test = pre_process_images(X_test, mean, stddev)
+    Y_train = one_hot_encode(Y_train, 10)
+    Y_val = one_hot_encode(Y_val, 10)
+    Y_test = one_hot_encode(Y_test, 10)
+
     global_step = 0
     for epoch in range(num_epochs):
         for step in range(num_batches_per_epoch):
@@ -71,6 +82,7 @@ if __name__ == "__main__":
     validation_percentage = 0.2
     X_train, Y_train, X_val, Y_val, X_test, Y_test = utils.load_full_mnist(
         validation_percentage)
+
 
     # Hyperparameters
     num_epochs = 20
