@@ -20,6 +20,12 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray,
     return np.mean(np.argmax(targets, axis=1) == np.argmax(outputs, axis=1))
 
 
+def shuffle(X: np.ndarray, Y: np.ndarray):
+    concat = np.concatenate((X_train, Y_train), axis=1)
+    np.random.shuffle(concat)
+    return concat[:,0:X.shape[1]], concat[:,X.shape[1]:]
+
+
 def train(
         model: SoftmaxModel,
         datasets: typing.List[np.ndarray],
@@ -49,6 +55,8 @@ def train(
 
     global_step = 0
     for epoch in range(num_epochs):
+        if use_shuffle:
+            X_train, Y_train = shuffle(X_train, Y_train)
         for step in range(num_batches_per_epoch):
             start = step * batch_size
             end = start + batch_size
@@ -94,7 +102,7 @@ if __name__ == "__main__":
     momentum_gamma = .9  # Task 3 hyperparameter
 
     # Settings for task 3. Keep all to false for task 2.
-    use_shuffle = False
+    use_shuffle = True
     use_improved_sigmoid = False
     use_improved_weight_init = False
     use_momentum = False
@@ -148,7 +156,7 @@ if __name__ == "__main__":
     plt.ylabel("Cross Entropy Loss")
     plt.legend()
     plt.subplot(1, 2, 2)
-    
+
     # Plot accuracy
     plt.ylim([0.9, 1.0])
     utils.plot_loss(train_accuracy, "Training Accuracy")
