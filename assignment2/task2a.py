@@ -5,7 +5,7 @@ import pdb
 np.random.seed(1)
 
 
-def pre_process_images(X: np.ndarray, mean = 33.34, stddev = 78.59):
+def pre_process_images(X: np.ndarray, mean=33.34, stddev=78.59):
     X = normalize(X, mean, stddev)
     X = np.concatenate((X, np.ones((X.shape[0], 1))), axis=1)
     return X
@@ -19,7 +19,7 @@ def stddev(x):
     return np.std(x)
 
 
-def normalize(x, mean = 33.34, stddev = 78.59):
+def normalize(x, mean=33.34, stddev=78.59):
     return (x - mean) / stddev
 
 
@@ -28,16 +28,18 @@ def sigmoid(z):
 
 
 def sigmoid_prime(z):
-    return sigmoid(z)*(1 - sigmoid(z))
+    return sigmoid(z) * (1 - sigmoid(z))
 
 
 def tanh(z):
     # suggested version of tanh as suggested by LeCun et al.
-    return 1.7159 * np.tanh(2 * z / 3) + 0.01 * z
+    return 1.7159 * np.tanh(2 * z / 3)
+    # return 1.7159 * np.tanh(2 * z / 3) + 0.01 * z # additional linear term
+
 
 def tanh_prime(z):
-    # suggested version of tanh as suggested by LeCun et al.
-    return 2.28787 / (np.cosh(4 * z / 3) + 1) + 0.01
+    return 2.28787 / (np.cosh(4 * z / 3) + 1)
+    # return 2.28787 / (np.cosh(4 * z / 3) + 1) + 0.01 # additional linear term
 
 
 def one_hot_encode(Y: np.ndarray, num_classes: int):
@@ -51,7 +53,7 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     cross_error = targets * np.log(outputs)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return - (1 / N ) * np.sum(cross_error)
+    return - (1 / N) * np.sum(cross_error)
 
 
 class SoftmaxModel:
@@ -90,7 +92,7 @@ class SoftmaxModel:
         self.grads = [None for i in range(len(self.ws))]
 
     def forward(self, X: np.ndarray) -> np.ndarray:
-        #the first propagation is always with the sigmoid function
+        # the first propagation is always with the sigmoid function
         z = np.dot(X, self.ws[0])
         self.zs.append(z)
         if self.use_improved_sigmoid:
@@ -115,7 +117,7 @@ class SoftmaxModel:
         if self.use_improved_sigmoid:
             cost_hiddenL = np.dot(cost_derivate, self.ws[1].T) * tanh_prime(self.zs[-1])
         else:
-            cost_hiddenL = np.dot(cost_derivate, self.ws[1].T) * tanh_prime(self.zs[-1])
+            cost_hiddenL = np.dot(cost_derivate, self.ws[1].T) * sigmoid_prime(self.zs[-1])
         delta_hiddenL = np.dot(X.T, cost_hiddenL)
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer

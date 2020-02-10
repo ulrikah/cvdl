@@ -23,7 +23,7 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray,
 def shuffle(X: np.ndarray, Y: np.ndarray):
     concat = np.concatenate((X_train, Y_train), axis=1)
     np.random.shuffle(concat)
-    return concat[:,0:X.shape[1]], concat[:,X.shape[1]:]
+    return concat[:, 0:X.shape[1]], concat[:,X.shape[1]:]
 
 
 def train(
@@ -47,12 +47,6 @@ def train(
     train_accuracy = {}
     val_accuracy = {}
 
-    neurons_per_layer = [64, 10]
-    use_improved_sigmoid = False
-    use_improved_weight_init = False
-    model = SoftmaxModel(
-        neurons_per_layer, use_improved_sigmoid, use_improved_weight_init)
-
     global_step = 0
     for epoch in range(num_epochs):
         if use_shuffle:
@@ -66,9 +60,14 @@ def train(
             # every time we progress 20% through the dataset
             outputs = model.forward(X_batch)
             model.backward(X_batch, outputs, Y_batch)
+
             # update weigths
-            model.ws[-1] = model.ws[-1] - learning_rate * model.grads[-1]
-            model.ws[-2] = model.ws[-2] - learning_rate * model.grads[-2]
+            if use_momentum:
+                model.ws[-1] = momentum_gamma * model.ws[-1] - learning_rate * model.grads[-1]
+                model.ws[-2] = momentum_gamma * model.ws[-2] - learning_rate * model.grads[-2]
+            else:
+                model.ws[-1] = model.ws[-1] - learning_rate * model.grads[-1]
+                model.ws[-2] = model.ws[-2] - learning_rate * model.grads[-2]
 
             if (global_step % num_steps_per_val) == 0:
                 _outputs_train = model.forward(X_train)
@@ -94,7 +93,6 @@ if __name__ == "__main__":
     X_train, Y_train, X_val, Y_val, X_test, Y_test = utils.load_full_mnist(
         validation_percentage)
 
-
     # Hyperparameters
     num_epochs = 20
     learning_rate = .1
@@ -105,14 +103,21 @@ if __name__ == "__main__":
     # Settings for task 3. Keep all to false for task 2.
     use_shuffle = True
     use_improved_sigmoid = True
-    use_improved_weight_init = True
+    use_improved_weight_init = False
     use_momentum = False
 
-    #Calibration
+    # advice from the assignment text
+    if use_momentum:
+        learning_rate = 0.02
+        print("Using momentum")
+        print("Momentum:", momentum_gamma)
+        print("learning_rate:", learning_rate)
+
+    # Calibration
     m = mean(X_train)
     std = stddev(X_train)
     X_train = pre_process_images(X_train, m, std)
-    X_val =  pre_process_images(X_val, m, std)
+    X_val = pre_process_images(X_val, m, std)
     X_test = pre_process_images(X_test, m, std)
     Y_train = one_hot_encode(Y_train, 10)
     Y_val = one_hot_encode(Y_val, 10)

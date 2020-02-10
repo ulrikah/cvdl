@@ -41,12 +41,6 @@ def train(
     train_accuracy = {}
     val_accuracy = {}
 
-    neurons_per_layer = [64, 10]
-    use_improved_sigmoid = False
-    use_improved_weight_init = False
-    model = SoftmaxModel(
-        neurons_per_layer, use_improved_sigmoid, use_improved_weight_init)
-
     global_step = 0
     for epoch in range(num_epochs):
         for step in range(num_batches_per_epoch):
