@@ -8,14 +8,6 @@ np.random.seed(0)
 
 def calculate_accuracy(X: np.ndarray, targets: np.ndarray,
                        model: SoftmaxModel) -> float:
-    """
-    Args:
-        X: images of shape [batch size, 785]
-        targets: labels/targets of each image of shape: [batch size, 10]
-        model: model of class SoftmaxModel
-    Returns:
-        Accuracy (float)
-    """
     outputs = model.forward(X)
     return np.mean(np.argmax(targets, axis=1) == np.argmax(outputs, axis=1))
 
@@ -49,6 +41,7 @@ def train(
 
     global_step = 0
     for epoch in range(num_epochs):
+        print("epoch:",epoch )
         if use_shuffle:
             X_train, Y_train = shuffle(X_train, Y_train)
         for step in range(num_batches_per_epoch):
@@ -103,7 +96,7 @@ if __name__ == "__main__":
     # Settings for task 3. Keep all to false for task 2.
     use_shuffle = True
     use_improved_sigmoid = True
-    use_improved_weight_init = False
+    use_improved_weight_init = True
     use_momentum = False
 
     # advice from the assignment text
@@ -164,11 +157,11 @@ if __name__ == "__main__":
     plt.subplot(1, 2, 2)
 
     # Plot accuracy
-    plt.ylim([0.9, 1.0])
+    #plt.ylim([0.9, 1.0])
     utils.plot_loss(train_accuracy, "Training Accuracy")
     utils.plot_loss(val_accuracy, "Validation Accuracy")
     plt.legend()
     plt.xlabel("Number of gradient steps")
     plt.ylabel("Accuracy")
-    plt.savefig("softmax_train_graph.png")
+    plt.savefig("softmax_train_graph_sigmoid.png")
     plt.show()

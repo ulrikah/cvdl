@@ -2,6 +2,7 @@ import numpy as np
 import utils
 import typing
 import pdb
+import matplotlib.pyplot as plt
 np.random.seed(1)
 
 
@@ -33,12 +34,13 @@ def sigmoid_prime(z):
 
 def tanh(z):
     # suggested version of tanh as suggested by LeCun et al.
-    return 1.7159 * np.tanh(2 * z / 3)
+    return 1.7159 * np.tanh(2 * z / 3) +0.01
     # return 1.7159 * np.tanh(2 * z / 3) + 0.01 * z # additional linear term
 
 
 def tanh_prime(z):
-    return 2.28787 / (np.cosh(4 * z / 3) + 1)
+    return 1.7159*(2/3)/((np.cosh(2 * z / 3)**2)) +0.01
+    #return 2.28787 / (np.cosh(4 * z / 3) + 1)
     # return 2.28787 / (np.cosh(4 * z / 3) + 1) + 0.01 # additional linear term
 
 
@@ -84,10 +86,15 @@ class SoftmaxModel:
             print("Initializing weight to shape:", w_shape)
             if self.use_improved_weight_init:
                 sqrt_fan = np.sqrt(w_shape[0])
-                w = np.random.uniform(-sqrt_fan, sqrt_fan, w_shape)
+                ws = np.random.normal(0, sqrt_fan,w_shape)
             else:
-                w = np.random.uniform(-1, 1, w_shape)
-            self.ws.append(w)
+                ws = np.random.normal(-1, 1, w_shape)
+            self.ws.append(ws)
+            '''
+            count, bins, ignored = plt.hist(ws, 30, density=True)
+            plt.plot(bins, 1/(sqrt_fan * np.sqrt(2 * np.pi)) *np.exp( - (bins - 0)**2 / (2 * sqrt_fan**2) ),linewidth=2, color='r')
+            plt.show()
+            '''
             prev = size
         self.grads = [None for i in range(len(self.ws))]
 
