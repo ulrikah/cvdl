@@ -80,6 +80,7 @@ class SoftmaxModel:
         self.activations=[]
         # Initialize the weights
         self.ws = []
+        self.var = []
         prev = self.I
         for size in self.neurons_per_layer:
             w_shape = (prev, size)
@@ -89,6 +90,7 @@ class SoftmaxModel:
                 ws = np.random.normal(0, sqrt_fan,w_shape)
             else:
                 ws = np.random.normal(-1, 1, w_shape)
+            self.var.append(np.zeros(w_shape))
             self.ws.append(ws)
             '''
             count, bins, ignored = plt.hist(ws, 30, density=True)
