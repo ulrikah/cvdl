@@ -65,8 +65,10 @@ def train(
 
             # update weigths
             if use_momentum:
-                model.ws[-1] = momentum_gamma * model.ws[-1] - learning_rate * model.grads[-1]
-                model.ws[-2] = momentum_gamma * model.ws[-2] - learning_rate * model.grads[-2]
+                model.var[-1]= momentum_gamma*model.var[-1] + (1- momentum_gamma)*model.grads[-1]
+                model.var[-2]= momentum_gamma*model.var[-2] + (1- momentum_gamma)*model.grads[-2]
+                model.ws[-1] =  model.ws[-1] - learning_rate * model.var[-1]
+                model.ws[-2] =  model.ws[-2] - learning_rate * model.var[-2]
             else:
                 model.ws[-1] = model.ws[-1] - learning_rate * model.grads[-1]
                 model.ws[-2] = model.ws[-2] - learning_rate * model.grads[-2]
@@ -108,7 +110,7 @@ if __name__ == "__main__":
     use_shuffle = True
     use_improved_sigmoid = True
     use_improved_weight_init = True
-    use_momentum = False
+    use_momentum = True
 
     # advice from the assignment text
     if use_momentum:
