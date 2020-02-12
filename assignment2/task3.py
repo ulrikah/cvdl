@@ -9,14 +9,6 @@ np.random.seed(0)
 
 def calculate_accuracy(X: np.ndarray, targets: np.ndarray,
                        model: SoftmaxModel) -> float:
-    """
-    Args:
-        X: images of shape [batch size, 785]
-        targets: labels/targets of each image of shape: [batch size, 10]
-        model: model of class SoftmaxModel
-    Returns:
-        Accuracy (float)
-    """
     outputs = model.forward(X)
     return np.mean(np.argmax(targets, axis=1) == np.argmax(outputs, axis=1))
 
@@ -47,7 +39,6 @@ def train(
     val_loss = {}
     train_accuracy = {}
     val_accuracy = {}
-
     global_step = 0
     for epoch in range(num_epochs):
         print("Epoch", epoch)
@@ -175,11 +166,11 @@ if __name__ == "__main__":
     plt.subplot(1, 2, 2)
 
     # Plot accuracy
-    plt.ylim([0.9, 1.0])
+    #plt.ylim([0.9, 1.0])
     utils.plot_loss(train_accuracy, "Training Accuracy")
     utils.plot_loss(val_accuracy, "Validation Accuracy")
     plt.legend()
     plt.xlabel("Number of gradient steps")
     plt.ylabel("Accuracy")
-    plt.savefig("softmax_train_graph.png")
+    plt.savefig("softmax_train_graph_sigmoid.png")
     plt.show()
