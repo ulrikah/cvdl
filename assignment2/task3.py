@@ -1,5 +1,6 @@
 import numpy as np
 import utils
+import time
 import matplotlib.pyplot as plt
 import typing
 from task2a import cross_entropy_loss, SoftmaxModel, one_hot_encode, pre_process_images, mean, stddev
@@ -40,7 +41,7 @@ def train(
     val_accuracy = {}
     global_step = 0
     for epoch in range(num_epochs):
-        print("epoch:",epoch )
+        print("Epoch", epoch)
         if use_shuffle:
             X_train, Y_train = shuffle(X_train, Y_train)
         for step in range(num_batches_per_epoch):
@@ -92,6 +93,8 @@ if __name__ == "__main__":
     learning_rate = .1
     batch_size = 32
     neurons_per_layer = [64, 10]
+    # neurons_per_layer = [16, 10]
+    # neurons_per_layer = [128, 10]
     momentum_gamma = .9  # Task 3 hyperparameter
 
     # Settings for task 3. Keep all to false for task 2.
@@ -122,6 +125,8 @@ if __name__ == "__main__":
         use_improved_sigmoid,
         use_improved_weight_init)
 
+    start = time.time()
+
     model, train_loss, val_loss, train_accuracy, val_accuracy = train(
         model,
         [X_train, Y_train, X_val, Y_val, X_test, Y_test],
@@ -131,6 +136,9 @@ if __name__ == "__main__":
         use_shuffle=use_shuffle,
         use_momentum=use_momentum,
         momentum_gamma=momentum_gamma)
+
+    m, s = divmod(time.time() - start, 60)
+    print("Training took", m, "minutes and", s, "seconds")
 
     print("Final Train Cross Entropy Loss:",
           cross_entropy_loss(Y_train, model.forward(X_train)))

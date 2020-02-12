@@ -86,17 +86,12 @@ class SoftmaxModel:
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
             if self.use_improved_weight_init:
-                sqrt_fan = np.sqrt(w_shape[0])
-                ws = np.random.normal(0, sqrt_fan,w_shape)
+                sqrt_fan = 1 / np.sqrt(w_shape[0])
+                w = np.random.normal(0, sqrt_fan, w_shape)
             else:
-                ws = np.random.normal(-1, 1, w_shape)
+                w = np.random.normal(-1, 1, w_shape)
             self.var.append(np.zeros(w_shape))
-            self.ws.append(ws)
-            '''
-            count, bins, ignored = plt.hist(ws, 30, density=True)
-            plt.plot(bins, 1/(sqrt_fan * np.sqrt(2 * np.pi)) *np.exp( - (bins - 0)**2 / (2 * sqrt_fan**2) ),linewidth=2, color='r')
-            plt.show()
-            '''
+            self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]
 
