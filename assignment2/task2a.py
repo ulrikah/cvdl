@@ -83,10 +83,10 @@ class SoftmaxModel:
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
             if self.use_improved_weight_init:
-                sqrt_fan = np.sqrt(w_shape[0])
-                w = np.random.uniform(-sqrt_fan, sqrt_fan, w_shape)
+                sqrt_fan = 1 / np.sqrt(w_shape[0])
+                w = np.random.normal(0, sqrt_fan, w_shape)
             else:
-                w = np.random.uniform(-1, 1, w_shape)
+                w = np.random.normal(-1, 1, w_shape)
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]
