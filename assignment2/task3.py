@@ -93,20 +93,10 @@ if __name__ == "__main__":
     num_epochs = 20
     learning_rate = .1
     batch_size = 32
-    neurons_per_layer = [64, 10]
+    # neurons_per_layer = [64, 10]
     # neurons_per_layer = [16, 10]
-    # neurons_per_layer = [128, 10]
+    neurons_per_layer = [128, 10]
     momentum_gamma = .9  # Task 3 hyperparameter
-
-    # Settings for task 3. Keep all to false for task 2.
-    use_shuffle = [False,True,True,True,True]
-    use_improved_sigmoid = [False,False,True,True,True]
-    use_improved_weight_init = [False,False,False,True,True]
-    use_momentum = [False,False,False,False,True]
-    train_loss=[0,0,0,0,0]
-    val_loss=[0,0,0,0,0]
-    train_accuracy=[0,0,0,0,0]
-    val_accuracy=[0,0,0,0,0]
 
     # Calibration
     m = mean(X_train)
@@ -117,6 +107,18 @@ if __name__ == "__main__":
     Y_train = one_hot_encode(Y_train, 10)
     Y_val = one_hot_encode(Y_val, 10)
     Y_test = one_hot_encode(Y_test, 10)
+
+    """
+    # Settings for task 3. Keep all to false for task 2.
+    use_shuffle = [False,True,True,True,True]
+    use_improved_sigmoid = [False,False,True,True,True]
+    use_improved_weight_init = [False,False,False,True,True]
+    use_momentum = [False,False,False,False,True]
+    train_loss=[0,0,0,0,0]
+    val_loss=[0,0,0,0,0]
+    train_accuracy=[0,0,0,0,0]
+    val_accuracy=[0,0,0,0,0]
+
 
     for k in range (len(use_shuffle)):
         if use_momentum[k]:
@@ -130,7 +132,7 @@ if __name__ == "__main__":
             use_improved_sigmoid[k],
             use_improved_weight_init[k])
 
-        #start = time.time()
+        start = time.time()
 
         model, train_loss[k], val_loss[k], train_accuracy[k], val_accuracy[k] = train(
             model,
@@ -141,14 +143,16 @@ if __name__ == "__main__":
             use_shuffle=use_shuffle[k],
             use_momentum=use_momentum[k],
             momentum_gamma=momentum_gamma)
-        print(k)
 
-    names = ["","+shuffle","shuffle+improved_sigmoid","shuffle+improved_sigmoid+improved_weight","shuffle+improved_sigmoid+improved_weight+momentum"]
+        m, s = divmod(time.time() - start, 60)
+        print("Training", k, "took", m, "minutes and", s, "seconds")
+
+    names = ["","-shuffle","shuffle-improved_sigmoid","shuffle-improved_sigmoid-improved_weight","shuffle-improved_sigmoid-improved_weight-momentum"]
     plt.figure(figsize=(20, 8))
     plt.subplot(1, 2, 1)
     plt.ylim([0, .5])
     for i in range(len(train_loss)):
-        utils.plot_loss(train_loss[i], "Training Loss"+names[i],'--')
+        utils.plot_loss(train_loss[i], "Training Loss"-names[i],'--')
         utils.plot_loss(val_loss[i], "Validation Loss"+names[i])
     plt.xlabel("Number of gradient steps")
     plt.ylabel("Cross Entropy Loss")
@@ -166,14 +170,9 @@ if __name__ == "__main__":
     plt.ylabel("Accuracy")
     plt.savefig("results.png")
     plt.show()
-
-
-
     """
 
-#printing only one courb
-
-    names = ["+shuffle","shuffle+improved_sigmoid","shuffle+improved_sigmoid+improved_weight","shuffle+improved_sigmoid+improved_weight+momentum"]
+    # printing only one courb
     use_shuffle = False
     use_improved_sigmoid = False
     use_improved_weight_init = False
@@ -184,7 +183,7 @@ if __name__ == "__main__":
         learning_rate = 0.02
         print("Using momentum")
         print("Momentum:", momentum_gamma)
-        print("learning_rate:", learning_rate)
+        print("learning_rate:", learning_rat+e)
 
     model = SoftmaxModel(
         neurons_per_layer,
@@ -224,8 +223,8 @@ if __name__ == "__main__":
     plt.figure(figsize=(20, 8))
     plt.subplot(1, 2, 1)
     plt.ylim([0, .5])
-    utils.plot_loss(train_loss, "Training Loss"+names[0])
-    utils.plot_loss(val_loss, "Validation Loss"+names[0])
+    utils.plot_loss(train_loss, "Training Loss")
+    utils.plot_loss(val_loss, "Validation Loss")
     plt.xlabel("Number of gradient steps")
     plt.ylabel("Cross Entropy Loss")
     plt.legend()
@@ -233,11 +232,10 @@ if __name__ == "__main__":
 
     # Plot accuracy
     plt.ylim([0.9, 1.0])
-    utils.plot_loss(train_accuracy, "Training Accuracy"+names[0])
-    utils.plot_loss(val_accuracy, "Validation Accuracy"+names[0])
+    utils.plot_loss(train_accuracy, "Training Accuracy")
+    utils.plot_loss(val_accuracy, "Validation Accuracy")
     plt.legend()
     plt.xlabel("Number of gradient steps")
     plt.ylabel("Accuracy")
     plt.savefig("softmax_train_graph.png")
     plt.show()
-    """
