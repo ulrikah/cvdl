@@ -80,7 +80,7 @@ class SoftmaxModel:
         self.activations=[]
         # Initialize the weights
         self.ws = []
-        self.var = []
+        self.prev_grad = []
         prev = self.I
         for size in self.neurons_per_layer:
             w_shape = (prev, size)
@@ -89,8 +89,8 @@ class SoftmaxModel:
                 sqrt_fan = 1 / np.sqrt(w_shape[0])
                 w = np.random.normal(0, sqrt_fan, w_shape)
             else:
-                w = np.random.normal(-1, 1, w_shape)
-            self.var.append(np.zeros(w_shape))
+                w = np.random.uniform(-1, 1, w_shape)
+            self.prev_grad.append(np.zeros(w_shape))
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]
