@@ -93,9 +93,9 @@ if __name__ == "__main__":
     num_epochs = 20
     learning_rate = .1
     batch_size = 32
-    # neurons_per_layer = [64, 10]
+    neurons_per_layer = [64, 10]
     # neurons_per_layer = [16, 10]
-    neurons_per_layer = [128, 10]
+    # neurons_per_layer = [128, 10]
     momentum_gamma = .9  # Task 3 hyperparameter
 
     # Calibration
@@ -108,8 +108,8 @@ if __name__ == "__main__":
     Y_val = one_hot_encode(Y_val, 10)
     Y_test = one_hot_encode(Y_test, 10)
 
-    """
     # Settings for task 3. Keep all to false for task 2.
+    """
     use_shuffle = [False,True,True,True,True]
     use_improved_sigmoid = [False,False,True,True,True]
     use_improved_weight_init = [False,False,False,True,True]
@@ -147,13 +147,13 @@ if __name__ == "__main__":
         m, s = divmod(time.time() - start, 60)
         print("Training", k, "took", m, "minutes and", s, "seconds")
 
-    names = ["","-shuffle","shuffle-improved_sigmoid","shuffle-improved_sigmoid-improved_weight","shuffle-improved_sigmoid-improved_weight-momentum"]
+    names = ["","shuffle","shuffle-improved_sigmoid","shuffle-improved_sigmoid-improved_weight","shuffle-improved_sigmoid-improved_weight-momentum"]
     plt.figure(figsize=(20, 8))
     plt.subplot(1, 2, 1)
     plt.ylim([0, .5])
     for i in range(len(train_loss)):
-        utils.plot_loss(train_loss[i], "Training Loss"-names[i],'--')
-        utils.plot_loss(val_loss[i], "Validation Loss"+names[i])
+        utils.plot_loss(train_loss[i], "Training Loss - " + names[i],'--')
+        utils.plot_loss(val_loss[i], "Validation Loss - " + names[i])
     plt.xlabel("Number of gradient steps")
     plt.ylabel("Cross Entropy Loss")
     plt.legend()
@@ -162,20 +162,19 @@ if __name__ == "__main__":
     plt.subplot(1, 2, 2)
     plt.ylim([0.9, 1.0])
     for j in range(len(train_accuracy)):
-
-        utils.plot_loss(train_accuracy[j], "Training Accuracy"+names[j],'--')
-        utils.plot_loss(val_accuracy[j], "Validation Accuracy"+names[j])
+        utils.plot_loss(train_accuracy[j], "Training Accuracy - " + names[j],'--')
+        utils.plot_loss(val_accuracy[j], "Validation Accuracy - " + names[j])
     plt.legend()
     plt.xlabel("Number of gradient steps")
     plt.ylabel("Accuracy")
     plt.savefig("results.png")
     plt.show()
-    """
 
+    """
     # printing only one courb
-    use_shuffle = False
-    use_improved_sigmoid = False
-    use_improved_weight_init = False
+    use_shuffle = True
+    use_improved_sigmoid = True
+    use_improved_weight_init = True
     use_momentum = False
 
 

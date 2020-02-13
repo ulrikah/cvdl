@@ -34,12 +34,12 @@ def sigmoid_prime(z):
 
 def tanh(z):
     # suggested version of tanh as suggested by LeCun et al.
-    return 1.7159 * np.tanh(2 * z / 3) +0.01
+    return 1.7159 * np.tanh(2 * z / 3) + 0.01 * z
     # return 1.7159 * np.tanh(2 * z / 3) + 0.01 * z # additional linear term
 
 
 def tanh_prime(z):
-    return 1.7159*(2/3)/((np.cosh(2 * z / 3)**2)) +0.01
+    return 1.7159*(2/3)/((np.cosh(2 * z / 3)**2)) + 0.01
     #return 2.28787 / (np.cosh(4 * z / 3) + 1)
     # return 2.28787 / (np.cosh(4 * z / 3) + 1) + 0.01 # additional linear term
 
@@ -97,14 +97,17 @@ class SoftmaxModel:
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         # the first propagation is always with the sigmoid function
-        z = np.dot(X, self.ws[0])
-        self.zs.append(z)
-        if self.use_improved_sigmoid:
-            activation = tanh(z)
-        else:
-            activation = sigmoid(z)
-        self.activations.append(activation)
-        a_k = self.softmax(np.dot(activation, self.ws[1]))
+        self.activations = [X]
+        for i in range(len(self.ws) - 1):
+            # import pdb; pdb.set_trace()
+            z = np.dot(self.activations[i], self.ws[i])
+            self.zs.append(z)
+            if self.use_improved_sigmoid:
+                activation = tanh(z)
+            else:
+                activation = sigmoid(z)
+            self.activations.append(activation)
+        a_k = self.softmax(np.dot(activation, self.ws[-1]))
         return a_k
 
     def softmax(self, z):
@@ -118,16 +121,17 @@ class SoftmaxModel:
         N, K = targets.shape
         cost_derivate = - (targets - outputs) / N # the error for the output layer
         delta = np.dot(self.activations[-1].T, cost_derivate) # error multiplied by activation of previous layer
-        if self.use_improved_sigmoid:
-            cost_hiddenL = np.dot(cost_derivate, self.ws[1].T) * tanh_prime(self.zs[-1])
-        else:
-            cost_hiddenL = np.dot(cost_derivate, self.ws[1].T) * sigmoid_prime(self.zs[-1])
-        delta_hiddenL = np.dot(X.T, cost_hiddenL)
-        # A list of gradients.
-        # For example, self.grads[0] will be the gradient for the first hidden layer
-        self.grads = []
-        self.grads.append(delta_hiddenL)
-        self.grads.append(delta)
+
+        self.grads = [np.zeros(w.shape) for w in self.ws]
+        self.grads[-1] = delta
+
+        cost = cost_derivate
+        for i in range(1, len(self.neurons_per_layer)):
+            if self.use_improved_sigmoid:
+                cost = np.dot(cost, self.ws[-i].T) * tanh_prime(self.zs[-i])
+            else:
+                cost = np.dot(cost, self.ws[-i].T) * sigmoid_prime(self.zs[-i])
+            self.grads[-i - 1] = np.dot(self.activations[-i - 1].T, cost)
 
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
@@ -135,7 +139,6 @@ class SoftmaxModel:
 
     def zero_grad(self) -> None:
         self.grads = [None for i in range(len(self.ws))]
-
 
 def gradient_approximation_test(
         model: SoftmaxModel, X: np.ndarray, Y: np.ndarray):
@@ -147,6 +150,7 @@ def gradient_approximation_test(
     for layer_idx, w in enumerate(model.ws):
         for i in range(w.shape[0]):
             for j in range(w.shape[1]):
+                num_epochs = 10
                 orig = model.ws[layer_idx][i, j].copy()
                 model.ws[layer_idx][i, j] = orig + epsilon
                 logits = model.forward(X)
@@ -167,7 +171,6 @@ def gradient_approximation_test(
                     f"Approximation: {gradient_approximation}, actual gradient: {model.grads[layer_idx][i, j]}\n" \
                     f"If this test fails there could be errors in your cross entropy loss function, " \
                     f"forward function or backward function"
-
 
 if __name__ == "__main__":
     # Simple test on one-hot encoding

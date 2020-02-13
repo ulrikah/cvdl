@@ -19,6 +19,7 @@ if __name__ == "__main__":
 
     # Modify your network here
     neurons_per_layer = [64, 64, 10]
+    # neurons_per_layer = [60, 60, 10] # task 4d
     use_improved_sigmoid = True
     use_improved_weight_init = True
     model = SoftmaxModel(
@@ -31,4 +32,3 @@ if __name__ == "__main__":
         model.ws[layer_idx] = np.random.uniform(-1, 1, size=w.shape)
 
     gradient_approximation_test(model, X_train, Y_train)
-
