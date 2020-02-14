@@ -93,9 +93,13 @@ if __name__ == "__main__":
     num_epochs = 20
     learning_rate = .1
     batch_size = 32
+
+    #task4d
+    #neurons_per_layer = [60,60,10]
+
     neurons_per_layer = [64, 10]
-    # neurons_per_layer = [16, 10]
-    # neurons_per_layer = [128, 10]
+    #neurons_per_layer = [16, 10]
+    #neurons_per_layer = [128, 10]
     momentum_gamma = .9  # Task 3 hyperparameter
 
     # Calibration
@@ -175,14 +179,14 @@ if __name__ == "__main__":
     use_shuffle = True
     use_improved_sigmoid = True
     use_improved_weight_init = True
-    use_momentum = False
+    use_momentum = True
 
 
     if use_momentum:
         learning_rate = 0.02
         print("Using momentum")
         print("Momentum:", momentum_gamma)
-        print("learning_rate:", learning_rat+e)
+        print("learning_rate:", learning_rate)
 
     model = SoftmaxModel(
         neurons_per_layer,
