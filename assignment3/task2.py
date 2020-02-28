@@ -43,9 +43,7 @@ def compute_loss_and_accuracy(
             
             
             
-            
             average_loss+= loss_criterion(output_probs,Y_batch)
-            # Compute Loss and Accuracy
         
         average_loss = average_loss/count
 
@@ -95,7 +93,7 @@ class ExampleModel(nn.Module):
             nn.MaxPool2d(2,2),
                     
         )
-        # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
+        # The output of feature_extractor will be [batch_size, num_filters, 4, 4]
         self.num_output_features = 4*4*128
         # Initialize our last fully connected layer
         # Inputs all extracted features from the convolutional layers
@@ -312,4 +310,4 @@ if __name__ == "__main__":
         dataloaders
     )
     trainer.train()
-    create_plots(trainer, "task2")
+create_plots(trainer, "task2")

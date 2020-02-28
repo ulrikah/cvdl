@@ -43,7 +43,8 @@ def load_cifar10(batch_size: int, validation_fraction: float = 0.1
     dataloader_train = torch.utils.data.DataLoader(data_train,
                                                    sampler=train_sampler,
                                                    batch_size=batch_size,
-                                                   num_workers=2)
+                                                   num_workers=2,
+                                                   drop_last=True)
 
     dataloader_val = torch.utils.data.DataLoader(data_train,
                                                  sampler=validation_sampler,
@@ -54,5 +55,4 @@ def load_cifar10(batch_size: int, validation_fraction: float = 0.1
                                                   batch_size=batch_size,
                                                   shuffle=False,
                                                   num_workers=2)
-
-    return dataloader_train, dataloader_test, dataloader_val
+    return dataloader_train, dataloader_val, dataloader_test
