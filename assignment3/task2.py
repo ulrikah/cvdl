@@ -35,16 +35,17 @@ def compute_loss_and_accuracy(
             X_batch = utils.to_cuda(X_batch)
             Y_batch = utils.to_cuda(Y_batch)
             # Forward pass the images through our model
-            
+
             output_probs = model(X_batch)
-            
-            
+
+
             _,predicted = torch.max(output_probs,1)
-            
-            
-            
+            total += Y_batch.size(0)
+            correct += (predicted==Y_batch).sum().item()
+
+
             average_loss+= loss_criterion(output_probs,Y_batch)
-        
+        accuracy= correct/total
         average_loss = average_loss/count
 
     return average_loss, accuracy
@@ -62,39 +63,39 @@ class ExampleModel(nn.Module):
                 num_classes: Number of classes we want to predict (10)
         """
         super().__init__()
-        num_filters = [32,64,128]  # Set number of filters in first conv layer
+        num_filters = [128,256,512]  # Set number of filters in first conv layer
         self.num_classes = num_classes
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(
                 in_channels=image_channels,
                 out_channels=num_filters[0],
-                kernel_size=5,
+                kernel_size=3,
                 stride=1,
-                padding=2
+                padding=1
             ),
             nn.ReLU(),
             nn.MaxPool2d(2,2),
             nn.Conv2d(in_channels=num_filters[0],
                       out_channels =num_filters[1],
-                      kernel_size=5,
+                      kernel_size=3,
                       stride=1,
-                      padding=2
+                      padding=1
             ),
             nn.ReLU(),
             nn.MaxPool2d(2,2),
             nn.Conv2d(in_channels=num_filters[1],
                       out_channels =num_filters[2],
-                      kernel_size=5,
+                      kernel_size=3,
                       stride=1,
-                      padding=2
+                      padding=1
             ),
             nn.ReLU(),
             nn.MaxPool2d(2,2),
-                    
+
         )
         # The output of feature_extractor will be [batch_size, num_filters, 4, 4]
-        self.num_output_features = 4*4*128
+        self.num_output_features = 4*4*512
         # Initialize our last fully connected layer
         # Inputs all extracted features from the convolutional layers
         # Outputs num_classes predictions, 1 for each class.
@@ -102,6 +103,7 @@ class ExampleModel(nn.Module):
         # included with nn.CrossEntropyLoss
         self.classifier = nn.Sequential(
             nn.Linear(self.num_output_features, 64),
+            nn.ReLU(),
             nn.Linear(64,num_classes),
         )
 
