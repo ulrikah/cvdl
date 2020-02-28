@@ -63,8 +63,11 @@ class ExampleModel(nn.Module):
                 num_classes: Number of classes we want to predict (10)
         """
         super().__init__()
-        num_filters = [128,256,512]  # Set number of filters in first conv layer
         self.num_classes = num_classes
+        ## MODEL 1
+        """
+        num_filters = [64,128,256,512]  # model 1
+
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(
@@ -74,7 +77,7 @@ class ExampleModel(nn.Module):
                 stride=1,
                 padding=1
             ),
-            nn.ReLU(),
+            nn.RReLU(),
             nn.MaxPool2d(2,2),
             nn.Conv2d(in_channels=num_filters[0],
                       out_channels =num_filters[1],
@@ -82,7 +85,7 @@ class ExampleModel(nn.Module):
                       stride=1,
                       padding=1
             ),
-            nn.ReLU(),
+            nn.RReLU(),
             nn.MaxPool2d(2,2),
             nn.Conv2d(in_channels=num_filters[1],
                       out_channels =num_filters[2],
@@ -90,7 +93,14 @@ class ExampleModel(nn.Module):
                       stride=1,
                       padding=1
             ),
-            nn.ReLU(),
+            nn.RReLU(),
+            nn.Conv2d(in_channels=num_filters[2],
+                      out_channels =num_filters[3],
+                      kernel_size=3,
+                      stride=1,
+                      padding=1
+            ),
+            nn.RReLU(),
             nn.MaxPool2d(2,2),
 
         )
@@ -103,9 +113,56 @@ class ExampleModel(nn.Module):
         # included with nn.CrossEntropyLoss
         self.classifier = nn.Sequential(
             nn.Linear(self.num_output_features, 64),
-            nn.ReLU(),
+            nn.RReLU(),
             nn.Linear(64,num_classes),
         )
+        """
+        ##MODEL 2
+        num_filters = [128,256,512]
+
+        self.feature_extractor = nn.Sequential(
+            nn.Conv2d(
+                in_channels=image_channels,
+                out_channels=num_filters[0],
+                kernel_size=5,
+                stride=1,
+                padding=2
+            ),
+            nn.RReLU(),
+            nn.MaxPool2d(2,2),
+            nn.Conv2d(in_channels=num_filters[0],
+                      out_channels =num_filters[1],
+                      kernel_size=5,
+                      stride=1,
+                      padding=2
+            ),
+            nn.RReLU(),
+            nn.MaxPool2d(2,2),
+            nn.Conv2d(in_channels=num_filters[1],
+                      out_channels =num_filters[2],
+                      kernel_size=5,
+                      stride=1,
+                      padding=2
+            ),
+            nn.RReLU(),
+            nn.MaxPool2d(2,2),
+
+        )
+        self.num_output_features = 4*4*num_filters[-1]
+        self.classifier = nn.Sequential(
+            nn.Linear(self.num_output_features, num_filters[-1]),
+            nn.RReLU(),
+            nn.Linear(num_filters[-1],num_filters[-2]),
+            nn.RReLU(),
+            nn.Linear(num_filters[-2],64),
+            nn.RReLU(),
+            nn.Linear(64,num_classes)
+
+        )
+
+
+
+
 
     def forward(self, x):
         """
@@ -220,6 +277,8 @@ class Trainer:
         # Track initial loss/accuracy
         def should_validate_model():
             return self.global_step % self.num_steps_per_val == 0
+        #model 2
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer,20)
 
         for epoch in range(self.epochs):
             self.epoch = epoch
@@ -241,6 +300,7 @@ class Trainer:
                 loss.backward()
 
                 # Gradient descent step
+
                 self.optimizer.step()
 
                 # Reset all computed gradients to 0
@@ -253,6 +313,9 @@ class Trainer:
                     if self.should_early_stop():
                         print("Early stopping.")
                         return
+        #model 2
+        scheduler.step()
+
 
     def save_model(self):
         def is_best_model():
