@@ -17,7 +17,7 @@ def build_dataset(base_path: str, dataset_list, transform=None, target_transform
     assert len(dataset_list) > 0
     datasets = []
     for dataset_name in dataset_list:
-        data = DatasetCatalog.get(dataset_name)
+        data = DatasetCatalog.get(base_path, dataset_name)
         args = data['args']
         factory = _DATASETS[data['factory']]
         args['transform'] = transform
