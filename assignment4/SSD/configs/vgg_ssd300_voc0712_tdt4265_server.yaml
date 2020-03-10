@@ -15,4 +15,4 @@ SOLVER:
 OUTPUT_DIR: 'outputs/vgg_VOC'
 EVAL_STEP: 2500
 MODEL_SAVE_STEP: 2500
-DATASET_DIR: "datasets/"
+DATASET_DIR: "/work/datasets/"

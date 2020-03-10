@@ -25,7 +25,6 @@ def calculate_iou(prediction_box, gt_box):
     iou = 0
     assert iou >= 0 and iou <= 1
     return iou
-    raise NotImplementedError
 
 
 def calculate_precision(num_tp, num_fp, num_fn):

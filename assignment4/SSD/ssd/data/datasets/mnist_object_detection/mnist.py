@@ -4,7 +4,6 @@ import numpy as np
 from urllib import request
 import gzip
 import pickle
-import os
 import pathlib
 
 filename = [
