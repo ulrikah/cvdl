@@ -1,5 +1,3 @@
-import glob
-import os
 import time
 import pathlib
 import torch
@@ -33,11 +31,13 @@ def run_demo(cfg, ckpt, score_threshold, images_dir: pathlib.Path, output_dir: p
     weight_file = ckpt if ckpt else checkpointer.get_checkpoint_file()
     print('Loaded weights from {}'.format(weight_file))
 
-    image_paths = images_dir.glob("*.png")
+    image_paths = list(images_dir.glob("*.png")) + list(images_dir.glob("*.jpg"))
+
     output_dir.mkdir(exist_ok=True, parents=True)
 
     transforms = build_transforms(cfg, is_train=False)
     model.eval()
+    drawn_images = []
     for i, image_path in enumerate(image_paths):
         start = time.time()
         image_name = image_path.name
@@ -66,6 +66,8 @@ def run_demo(cfg, ckpt, score_threshold, images_dir: pathlib.Path, output_dir: p
         image_name = image_path.name
 
         drawn_image = draw_boxes(image, boxes, labels, scores, class_names).astype(np.uint8)
+        drawn_images.append(drawn_image)
+    return drawn_images
 
 
 def main():
@@ -80,7 +82,6 @@ def main():
     parser.add_argument("--ckpt", type=str, default=None, help="Trained weights.")
     parser.add_argument("--score_threshold", type=float, default=0.7)
     parser.add_argument("--images_dir", default='demo/voc', type=str, help='Specify a image dir to do prediction.')
-#    parser.add_argument("--output_dir", default='demo/result', type=str, help='Specify a image dir to save predicted images.')
     parser.add_argument("--dataset_type", default="voc", type=str, help='Specify dataset type. Currently support voc and coco.')
 
     parser.add_argument(

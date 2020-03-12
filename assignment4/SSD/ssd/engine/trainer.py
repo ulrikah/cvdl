@@ -24,8 +24,7 @@ def do_train(cfg, model,
              optimizer,
              scheduler,
              checkpointer,
-             arguments,
-             args):
+             arguments):
     logger = logging.getLogger("SSD.trainer")
     logger.info("Start training ...")
     meters = MetricLogger()

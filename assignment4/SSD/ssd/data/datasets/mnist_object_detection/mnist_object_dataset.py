@@ -4,7 +4,6 @@ import pathlib
 import cv2
 import numpy as np
 import tqdm
-from PIL import Image
 from .visualize_dataset import read_labels
 
 

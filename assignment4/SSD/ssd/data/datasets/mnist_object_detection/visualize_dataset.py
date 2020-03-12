@@ -8,7 +8,7 @@ colors = ["blue", "green", "cyan", "red", "yellow", "magenta", "peru", "azure", 
 
 
 def plot_bbox(bbox_XYXY, label):
-    xmin, ymin, xmax, ymax =bbox_XYXY
+    xmin, ymin, xmax, ymax = bbox_XYXY
     plt.plot(
         [xmin, xmin, xmax, xmax, xmin],
         [ymin, ymax, ymax, ymin, ymin],

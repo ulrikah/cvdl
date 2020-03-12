@@ -1,5 +1,4 @@
 import torch
-from ssd import torch_utils
 
 
 class BasicModel(torch.nn.Module):

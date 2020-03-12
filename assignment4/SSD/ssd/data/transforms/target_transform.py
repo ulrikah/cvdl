@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-
 from ssd.utils import box_utils
 
 

@@ -14,7 +14,7 @@ from ssd.utils.logger import setup_logger
 from ssd import torch_utils
 
 
-def train(cfg, args):
+def start_train(cfg):
     logger = logging.getLogger('SSD.trainer')
     model = SSDDetector(cfg)
     model = torch_utils.to_cuda(model)
@@ -34,7 +34,7 @@ def train(cfg, args):
     max_iter = cfg.SOLVER.MAX_ITER
     train_loader = make_data_loader(cfg, is_train=True, max_iter=max_iter, start_iter=arguments['iteration'])
 
-    model = do_train(cfg, model, train_loader, optimizer, scheduler, checkpointer, arguments, args)
+    model = do_train(cfg, model, train_loader, optimizer, scheduler, checkpointer, arguments)
     return model
 
 
@@ -55,7 +55,6 @@ def main():
     )
     args = parser.parse_args()
 
-
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
@@ -71,7 +70,7 @@ def main():
         logger.info(config_str)
     logger.info("Running with config:\n{}".format(cfg))
 
-    model = train(cfg, args)
+    model = start_train(cfg)
 
     logger.info('Start evaluating...')
     torch.cuda.empty_cache()  # speed up evaluating after training finished

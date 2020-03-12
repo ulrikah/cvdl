@@ -1,14 +1,12 @@
 import argparse
 import logging
-import os
-import torch
-import torch.utils.data
 from ssd.config.defaults import cfg
 from ssd.engine.inference import do_evaluation
 from ssd.modeling.detector import SSDDetector
 from ssd.utils.checkpoint import CheckPointer
 from ssd.utils.logger import setup_logger
 from ssd import torch_utils
+
 
 def evaluation(cfg, ckpt):
     logger = logging.getLogger("SSD.inference")
@@ -60,5 +58,4 @@ def main():
 
 
 if __name__ == '__main__':
-    print(cfg)
     main()
