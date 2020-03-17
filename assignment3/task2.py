@@ -25,16 +25,28 @@ def compute_loss_and_accuracy(
     """
     average_loss = 0
     accuracy = 0
-
+    count=0
+    total =0
+    correct =0
     with torch.no_grad():
         for (X_batch, Y_batch) in dataloader:
+            count+=1
             # Transfer images/labels to GPU VRAM, if possible
             X_batch = utils.to_cuda(X_batch)
             Y_batch = utils.to_cuda(Y_batch)
             # Forward pass the images through our model
+
             output_probs = model(X_batch)
 
-            # Compute Loss and Accuracy
+
+            _,predicted = torch.max(output_probs,1)
+            total += Y_batch.size(0)
+            correct += (predicted==Y_batch).sum().item()
+
+
+            average_loss+= loss_criterion(output_probs,Y_batch)
+        accuracy= correct/total
+        average_loss = average_loss/count
 
     return average_loss, accuracy
 
@@ -51,28 +63,106 @@ class ExampleModel(nn.Module):
                 num_classes: Number of classes we want to predict (10)
         """
         super().__init__()
-        num_filters = 32  # Set number of filters in first conv layer
         self.num_classes = num_classes
+        ## MODEL 1
+        """
+        num_filters = [64,128,256,512]  # model 1
+
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(
                 in_channels=image_channels,
-                out_channels=num_filters,
-                kernel_size=5,
+                out_channels=num_filters[0],
+                kernel_size=3,
                 stride=1,
-                padding=2
-            )
+                padding=1
+            ),
+            nn.RReLU(),
+            nn.MaxPool2d(2,2),
+            nn.Conv2d(in_channels=num_filters[0],
+                      out_channels =num_filters[1],
+                      kernel_size=3,
+                      stride=1,
+                      padding=1
+            ),
+            nn.RReLU(),
+            nn.MaxPool2d(2,2),
+            nn.Conv2d(in_channels=num_filters[1],
+                      out_channels =num_filters[2],
+                      kernel_size=3,
+                      stride=1,
+                      padding=1
+            ),
+            nn.RReLU(),
+            nn.Conv2d(in_channels=num_filters[2],
+                      out_channels =num_filters[3],
+                      kernel_size=3,
+                      stride=1,
+                      padding=1
+            ),
+            nn.RReLU(),
+            nn.MaxPool2d(2,2),
+
         )
-        # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
-        self.num_output_features = 32*32*32
+        # The output of feature_extractor will be [batch_size, num_filters, 4, 4]
+        self.num_output_features = 4*4*512
         # Initialize our last fully connected layer
         # Inputs all extracted features from the convolutional layers
         # Outputs num_classes predictions, 1 for each class.
         # There is no need for softmax activation function, as this is
         # included with nn.CrossEntropyLoss
         self.classifier = nn.Sequential(
-            nn.Linear(self.num_output_features, num_classes),
+            nn.Linear(self.num_output_features, 64),
+            nn.RReLU(),
+            nn.Linear(64,num_classes),
         )
+        """
+        ##MODEL 2
+        num_filters = [128,256,512]
+
+        self.feature_extractor = nn.Sequential(
+            nn.Conv2d(
+                in_channels=image_channels,
+                out_channels=num_filters[0],
+                kernel_size=5,
+                stride=1,
+                padding=2
+            ),
+            nn.RReLU(),
+            nn.MaxPool2d(2,2),
+            nn.Conv2d(in_channels=num_filters[0],
+                      out_channels =num_filters[1],
+                      kernel_size=5,
+                      stride=1,
+                      padding=2
+            ),
+            nn.RReLU(),
+            nn.MaxPool2d(2,2),
+            nn.Conv2d(in_channels=num_filters[1],
+                      out_channels =num_filters[2],
+                      kernel_size=5,
+                      stride=1,
+                      padding=2
+            ),
+            nn.RReLU(),
+            nn.MaxPool2d(2,2),
+
+        )
+        self.num_output_features = 4*4*num_filters[-1]
+        self.classifier = nn.Sequential(
+            nn.Linear(self.num_output_features, num_filters[-1]),
+            nn.RReLU(),
+            nn.Linear(num_filters[-1],num_filters[-2]),
+            nn.RReLU(),
+            nn.Linear(num_filters[-2],64),
+            nn.RReLU(),
+            nn.Linear(64,num_classes)
+
+        )
+
+
+
+
 
     def forward(self, x):
         """
@@ -82,6 +172,9 @@ class ExampleModel(nn.Module):
         """
         batch_size = x.shape[0]
         out = x
+        out = self.feature_extractor(out)
+        out = out.view(-1,self.num_output_features)
+        out = self.classifier(out)
         expected_shape = (batch_size, self.num_classes)
         assert out.shape == (batch_size, self.num_classes),\
             f"Expected output of forward pass to be: {expected_shape}, but got: {out.shape}"
@@ -184,6 +277,8 @@ class Trainer:
         # Track initial loss/accuracy
         def should_validate_model():
             return self.global_step % self.num_steps_per_val == 0
+        #model 2
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer,20)
 
         for epoch in range(self.epochs):
             self.epoch = epoch
@@ -205,6 +300,7 @@ class Trainer:
                 loss.backward()
 
                 # Gradient descent step
+
                 self.optimizer.step()
 
                 # Reset all computed gradients to 0
@@ -217,6 +313,9 @@ class Trainer:
                     if self.should_early_stop():
                         print("Early stopping.")
                         return
+        #model 2
+        scheduler.step()
+
 
     def save_model(self):
         def is_best_model():
@@ -276,4 +375,4 @@ if __name__ == "__main__":
         dataloaders
     )
     trainer.train()
-    create_plots(trainer, "task2")
+create_plots(trainer, "task2")

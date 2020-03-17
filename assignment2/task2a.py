@@ -120,9 +120,10 @@ class SoftmaxModel:
 
         N, K = targets.shape
         cost_derivate = - (targets - outputs) / N
+        
         # the error for the output layer
         delta = np.dot(self.activations[-1].T, cost_derivate) # error multiplied by activation of previous layer
-
+        
         self.grads = [np.zeros(w.shape) for w in self.ws]
         self.grads[-1] = delta
 

@@ -14,6 +14,7 @@ def load_cifar10(batch_size: int, validation_fraction: float = 0.1
     # Note that transform train will apply the same transform for
     # validation!
     transform_train = transforms.Compose([
+        transforms.RandomHorizontalFlip(0.5),
         transforms.ToTensor(),
         transforms.Normalize(mean, std),
     ])
@@ -55,5 +56,4 @@ def load_cifar10(batch_size: int, validation_fraction: float = 0.1
                                                   batch_size=batch_size,
                                                   shuffle=False,
                                                   num_workers=2)
-
-    return dataloader_train, dataloader_test, dataloader_val
+    return dataloader_train, dataloader_val, dataloader_test

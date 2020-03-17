@@ -6,6 +6,7 @@ files_to_include = [
     "task2.py",
     "task2a.py",
     "task4c.py",
+    "task3.py",
     "utils.py",
     "mnist.py"
 ]
