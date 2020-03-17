@@ -4,52 +4,59 @@ from tools import read_predicted_boxes, read_ground_truth_boxes
 
 
 def calculate_iou(prediction_box, gt_box):
-    """Calculate intersection over union of single predicted and ground truth box.
 
+    if prediction_box[0]>gt_box[2] or prediction_box[2]< gt_box[0] or prediction_box[1]>gt_box[3] or prediction_box[3]< gt_box[1] :
+        intersection = 0
+    else :
+        box_inter =[]
+        for k in range (len(gt_box)):
+            if k<2:
+                box_inter.append(max(prediction_box[k],gt_box[k]))
+            else :
+                box_inter.append(min(prediction_box[k],gt_box[k]))
+
+
+
+        intersection = (box_inter[2]-box_inter[0])*(box_inter[3]-box_inter[1])
+    """
     Args:
         prediction_box (np.array of floats): location of predicted object as
             [xmin, ymin, xmax, ymax]
         gt_box (np.array of floats): location of ground truth object as
             [xmin, ymin, xmax, ymax]
 
-        returns:
-            float: value of the intersection of union for the two boxes.
+
     """
-    # YOUR CODE HERE
 
-    # Compute intersection
-
-    # Compute union
-    iou = 0
+    
+    sum_box = (gt_box[2]-gt_box[0])*(gt_box[3]-gt_box[1]) + (prediction_box[2]-prediction_box[0])*(prediction_box[3]-prediction_box[1])
+    union=sum_box - intersection
+    print(intersection/union)
+    
+    iou = intersection/union
     assert iou >= 0 and iou <= 1
     return iou
 
 
 def calculate_precision(num_tp, num_fp, num_fn):
-    """ Calculates the precision for the given parameters.
-        Returns 1 if num_tp + num_fp = 0
 
-    Args:
-        num_tp (float): number of true positives
-        num_fp (float): number of false positives
-        num_fn (float): number of false negatives
-    Returns:
-        float: value of precision
-    """
-    raise NotImplementedError
+    total_d = (num_tp+num_fp)
+    if total_d == 0:
+        return 1
+    else :
+        prec = num_tp / total_d
+        return prec
+
 
 
 def calculate_recall(num_tp, num_fp, num_fn):
-    """ Calculates the recall for the given parameters.
-        Returns 0 if num_tp + num_fn = 0
-    Args:
-        num_tp (float): number of true positives
-        num_fp (float): number of false positives
-        num_fn (float): number of false negatives
-    Returns:
-        float: value of recall
-    """
-    raise NotImplementedError
+    total_case = num_tp+num_fn
+    if total_case ==0:
+        return 0
+    else:
+        recall = num_tp/ total_case
+        return recall
+
 
 
 def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
