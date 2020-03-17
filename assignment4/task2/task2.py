@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tools import read_predicted_boxes, read_ground_truth_boxes
-
+import operator
 
 def calculate_iou(prediction_box, gt_box):
 
@@ -60,6 +60,8 @@ def calculate_recall(num_tp, num_fp, num_fn):
 
 
 def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
+
+
     """Finds all possible matches for the predicted boxes to the ground truth boxes.
         No bounding box can have more than one match.
 
@@ -85,10 +87,38 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
     # Sort all matches on IoU in descending order
 
     # Find all matches with the highest IoU threshold
+    m=gt_boxes.shape[0]
+    n=gt_boxes.shape[1]
+    count=0
+    matched_box =np.zeros((m,n))
+    predicted_box=np.zeros((m,n))
+    for j in range(gt_boxes.shape[0]):
+        dict_IoU ={}
+        for k in range(prediction_boxes.shape[0]) :
+            iou_real = calculate_iou(prediction_boxes[k,:],gt_boxes[j,:])
+            if iou_real>= iou_threshold :
+                dict_IoU[k]= iou_real
 
+        if dict_IoU:
+            best_box = max(dict_IoU.items(),key=operator.itemgetter(1))[0]
+            matched_box[count,:] = gt_boxes[j,:]
+            predicted_box[count,:] = prediction_boxes[int(best_box),:]
+            count+=1
+    if m!=count :
+        temp = m-count
+        print("matched box ")
+        print(matched_box[:-temp, :])
+        print(" predicted_boxes ")
+        print(predicted_box[:-temp, :])
+        return predicted_box[:-temp, :],matched_box[:-temp, :]
+    else :
+        print("matched box ")
+        print(matched_box)
+        print(" predicted_boxes ")
+        print(predicted_box)
 
-    
-    return np.array([]), np.array([])
+        
+        return predicted_box,matched_box
 
 
 def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold):
