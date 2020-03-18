@@ -61,7 +61,10 @@ def calculate_recall(num_tp, num_fp, num_fn):
 
 def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
 
-
+    if  len(prediction_boxes)==0 or len(gt_boxes)==0 :
+        print("test")
+        return np.array([]), np.array([])
+        
     """Finds all possible matches for the predicted boxes to the ground truth boxes.
         No bounding box can have more than one match.
 
@@ -90,35 +93,30 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
     m=gt_boxes.shape[0]
     n=gt_boxes.shape[1]
     count=0
+    dict_IoU ={}
     matched_box =np.zeros((m,n))
     predicted_box=np.zeros((m,n))
-    for j in range(gt_boxes.shape[0]):
-        dict_IoU ={}
+    for i in range(gt_boxes.shape[0]):
         for k in range(prediction_boxes.shape[0]) :
-            iou_real = calculate_iou(prediction_boxes[k,:],gt_boxes[j,:])
+            iou_real = calculate_iou(prediction_boxes[k,:],gt_boxes[i,:])
             if iou_real>= iou_threshold :
-                dict_IoU[k]= iou_real
-
-        if dict_IoU:
-            best_box = max(dict_IoU.items(),key=operator.itemgetter(1))[0]
-            matched_box[count,:] = gt_boxes[j,:]
-            predicted_box[count,:] = prediction_boxes[int(best_box),:]
-            count+=1
+                dict_IoU[(i,k)]= iou_real
+    while dict_IoU:
+        best_match = max(dict_IoU.keys(), key=lambda key: dict_IoU[key])
+        print(best_match)
+        temp = dict_IoU.copy()
+        for key in temp.keys():
+            if key[0]==best_match[0] or key[1]==best_match[1]:
+                dict_IoU.pop(key)
+        matched_box[count,:] = gt_boxes[best_match[0],:]
+        predicted_box[count,:] = prediction_boxes[best_match[1],:]
+        count+=1
     if m!=count :
-        temp = m-count
-        print("matched box ")
-        print(matched_box[:-temp, :])
-        print(" predicted_boxes ")
-        print(predicted_box[:-temp, :])
-        return predicted_box[:-temp, :],matched_box[:-temp, :]
-    else :
-        print("matched box ")
-        print(matched_box)
-        print(" predicted_boxes ")
-        print(predicted_box)
-
-        
+        index = m-count
+        return predicted_box[:-index, :],matched_box[:-index, :]
+    else:
         return predicted_box,matched_box
+
 
 
 def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold):
