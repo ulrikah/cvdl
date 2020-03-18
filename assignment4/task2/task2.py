@@ -82,6 +82,7 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
             Each row includes [xmin, xmax, ymin, ymax]
     """
     
+
     if  len(prediction_boxes)==0 or len(gt_boxes)==0 :
         return np.array([]), np.array([])
 
@@ -167,7 +168,7 @@ def calculate_precision_recall_all_images(
         num_fn += values["false_neg"]
     precision = calculate_precision(num_tp, num_fp, num_fn)
     recall = calculate_recall(num_tp, num_fp, num_fn)
-    return precision, recall
+    return (precision, recall)
 
 
 def get_precision_recall_curve(
@@ -201,30 +202,19 @@ def get_precision_recall_curve(
     # YOUR CODE HERE
     precisions = []
     recalls = []
-    '''
     confidence_thresholds = np.linspace(0, 1, 500)
     for thresh in np.nditer(confidence_thresholds):
-        for i in range(len(confidence_scores)): #  s = np.array([0.4, 0.7, 0.6, 0.9])
+        _prediction_boxes = all_prediction_boxes.copy()
+        _gt_boxes = all_gt_boxes.copy()
+        for i in range(len(confidence_scores)):
             for j in range(len(confidence_scores[i])):
                 if confidence_scores[i][j] < thresh:
                     # delete from predictions
-                    _prediction_boxes = np.delete(all_prediction_boxes, all_prediction_boxes[j], 0)
-                    _gt_boxes = np.delete(all_gt_boxes, all_gt_boxes[j], 0)
-                    p, r = calculate_precision_recall_all_images(
-                        _prediction_boxes,
-                        _gt_boxes,
-                        iou_threshold
-                    )
-                    # pdb.set_trace()
-                else:
-                    p, r = calculate_precision_recall_all_images(
-                        all_prediction_boxes,
-                        all_gt_boxes,
-                        iou_threshold
-                    )
-                precisions.append(p)
-                recalls.append(p)
-    '''
+                    _prediction_boxes[i] = np.delete(all_prediction_boxes[i], j, 0)
+                    _gt_boxes[i] = np.delete(all_gt_boxes[i], j, 0)
+        p, r = calculate_precision_recall_all_images(_prediction_boxes, _gt_boxes, iou_threshold)
+        precisions.append(p)
+        recalls.append(p)
     return np.array(precisions), np.array(recalls)
 
 
