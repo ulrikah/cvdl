@@ -177,18 +177,7 @@ def get_precision_recall_curve(
     """Given a set of prediction boxes and ground truth boxes for all images,
        calculates the recall-precision curve over all images.
        for a single image.
-
-       NB: all_prediction_boxes and all_gt_boxes are not matched!
-
     Args:
-        all_prediction_boxes: (list of np.array of floats): each element in the list
-            is a np.array containing all predicted bounding boxes for the given image
-            with shape: [number of predicted boxes, 4].
-            Each row includes [xmin, xmax, ymin, ymax]
-        all_gt_boxes: (list of np.array of floats): each element in the list
-            is a np.array containing all ground truth bounding boxes for the given image
-            objects with shape: [number of ground truth boxes, 4].
-            Each row includes [xmin, xmax, ymin, ymax]
         scores: (list of np.array of floats): each element in the list
             is a np.array containting the confidence score for each of the
             predicted bounding box. Shape: [number of predicted boxes]
@@ -199,7 +188,6 @@ def get_precision_recall_curve(
     """
     # Instead of going over every possible confidence score threshold to compute the PR
     # curve, we will use an approximation
-    # YOUR CODE HERE
     precisions = []
     recalls = []
     confidence_thresholds = np.linspace(0, 1, 500)
@@ -253,9 +241,16 @@ def calculate_mean_average_precision(precisions, recalls):
         float: mean average precision
     """
     # Calculate the mean average precision given these recall levels.
+   
+    L=[]
     recall_levels = np.linspace(0, 1.0, 11)
-    # YOUR CODE HERE
-    average_precision = 0
+    for k in range(len(recall_levels)) :
+        maxi=0
+        for i in range(len(recalls)):
+            if recall_levels[k]<= recalls[i] and maxi < precisions[i]:
+                maxi = precisions[i]
+        L.append(maxi)
+    average_precision=sum(L)/len(L)
     return average_precision
 
 
