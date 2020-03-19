@@ -204,17 +204,21 @@ def get_precision_recall_curve(
     recalls = []
     confidence_thresholds = np.linspace(0, 1, 500)
     for thresh in np.nditer(confidence_thresholds):
-        _prediction_boxes = all_prediction_boxes.copy()
-        _gt_boxes = all_gt_boxes.copy()
+        _prediction_boxes = []
         for i in range(len(confidence_scores)):
+            index=[]
             for j in range(len(confidence_scores[i])):
-                if confidence_scores[i][j] < thresh:
+                if confidence_scores[i][j] > thresh:
                     # delete from predictions
-                    _prediction_boxes[i] = np.delete(all_prediction_boxes[i], j, 0)
-                    _gt_boxes[i] = np.delete(all_gt_boxes[i], j, 0)
-        p, r = calculate_precision_recall_all_images(_prediction_boxes, _gt_boxes, iou_threshold)
+                    index.append(j)
+            p_image = np.zeros((len(index),4))
+            for row in range(len(index)):
+                p_image[row,:] = all_prediction_boxes[i][index[row]]
+            _prediction_boxes.append(p_image)
+
+        p, r = calculate_precision_recall_all_images(_prediction_boxes, all_gt_boxes, iou_threshold)
         precisions.append(p)
-        recalls.append(p)
+        recalls.append(r)
     return np.array(precisions), np.array(recalls)
 
 
