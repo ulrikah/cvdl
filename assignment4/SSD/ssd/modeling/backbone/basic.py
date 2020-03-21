@@ -72,7 +72,7 @@ class BasicModel(torch.nn.Module):
             nn.Conv2d(self.output_channels[4], self.output_channels[5], kernel_size=3, stride=1, padding=0)
         )
 
-        self.layers = [bank1, bank2, bank3, bank4, bank5, bank6]
+        self.layers = nn.ModuleList([bank1, bank2, bank3, bank4, bank5, bank6])
     
     def forward(self, x):
         """
