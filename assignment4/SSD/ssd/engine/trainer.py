@@ -59,6 +59,10 @@ def do_train(cfg, model,
         if iteration % cfg.LOG_STEP == 0:
             eta_seconds = meters.time.global_avg * (max_iter - iteration)
             eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
+            if torch.cuda.is_available():
+                mem = round(torch.cuda.max_memory_allocated() / 1024.0 / 1024.0)
+            else:
+                mem = "Cuda memory is not available"
             logger.info(
                 meters.delimiter.join([
                     "iter: {iter:06d}",
@@ -71,7 +75,7 @@ def do_train(cfg, model,
                     lr=optimizer.param_groups[0]['lr'],
                     meters=str(meters),
                     eta=eta_string,
-                    mem=round(torch.cuda.max_memory_allocated() / 1024.0 / 1024.0))
+                    mem=mem)
             )
             global_step = iteration
             summary_writer.add_scalar(
