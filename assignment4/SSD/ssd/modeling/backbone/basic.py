@@ -23,9 +23,10 @@ class BasicModel(torch.nn.Module):
         self.output_feature_size = cfg.MODEL.PRIORS.FEATURE_MAPS
 
 
+        self.layers = nn.ModuleList()
+        
         # VGG
-        # 38 x 38
-        bank1 = nn.Sequential(
+        self.layers.append(nn.Sequential(
             nn.Conv2d(image_channels, 32, kernel_size=3, padding=1, stride=1),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.ReLU(inplace=True),
@@ -35,44 +36,22 @@ class BasicModel(torch.nn.Module):
             nn.Conv2d(64, 64, kernel_size=3, padding=1, stride=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(64, self.output_channels[0], kernel_size=3, padding=1, stride=2)
-        )
-        # 19 x 19
-        bank2 = nn.Sequential(
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[0], self.output_channels[0], kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[0], self.output_channels[1], kernel_size=3, stride=2, padding=1)
-        )
-        # 9 x 9
-        bank3 = nn.Sequential(
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[1], self.output_channels[1], kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[1], self.output_channels[2], kernel_size=3, stride=2, padding=1)
-        )
-        # 5 x 5
-        bank4 = nn.Sequential(
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[2], self.output_channels[2], kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[2], self.output_channels[3], kernel_size=3, stride=2, padding=1)
-        )
-        # 3 x 3
-        bank5 = nn.Sequential(
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[3], self.output_channels[3], kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[3], self.output_channels[4], kernel_size=3, stride=2, padding=1)
-        )
-        # 1 x 1
-        bank6 = nn.Sequential(
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[4], self.output_channels[4], kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[4], self.output_channels[5], kernel_size=3, stride=1, padding=0)
-        )
+        ))
 
-        self.layers = nn.ModuleList([bank1, bank2, bank3, bank4, bank5, bank6])
+        # rest of the layers except last one
+        for i in range(len(self.output_feature_size) - 2):
+            self.layers.append(nn.Sequential(
+                nn.ReLU(inplace=True),
+                nn.Conv2d(self.output_channels[i], self.output_channels[i], kernel_size=3, stride=1, padding=1),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(self.output_channels[i], self.output_channels[i + 1], kernel_size=3, stride=2, padding=1)
+            ))
+        self.layers.append(nn.Sequential(
+            nn.ReLU(inplace=True),
+            nn.Conv2d(self.output_channels[-2], self.output_channels[-2], kernel_size=3, stride=1, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(self.output_channels[-2], self.output_channels[-1], kernel_size=3, stride=1, padding=0)
+        ))
     
     def forward(self, x):
         """
