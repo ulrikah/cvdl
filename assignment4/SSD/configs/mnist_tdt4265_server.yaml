@@ -16,7 +16,7 @@ SOLVER:
     GAMMA: 0.1
     BATCH_SIZE: 16
     LR: 1e-3
-OUTPUT_DIR: 'outputs/basic_4c_asda'
+OUTPUT_DIR: 'outputs/basic_4c'
 DATASET_DIR: "/work/datasets"
 EVAL_STEP: 2000
 MODEL_SAVE_STEP: 2000
