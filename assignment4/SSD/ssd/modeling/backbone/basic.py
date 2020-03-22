@@ -27,13 +27,15 @@ class BasicModel(torch.nn.Module):
         
         # VGG
         self.layers.append(nn.Sequential(
-            nn.Conv2d(image_channels, 32, kernel_size=3, padding=1, stride=1),
+            nn.Conv2d(image_channels, 128, kernel_size=3, padding=1, stride=1),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.ReLU(inplace=True),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1, stride=1),
+            nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=1),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.ReLU(inplace=True),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1, stride=1),
+            nn.Conv2d(256, 128, kernel_size=3, padding=1, stride=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(128, 64, kernel_size=3, padding=1, stride=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(64, self.output_channels[0], kernel_size=3, padding=1, stride=2)
         ))
