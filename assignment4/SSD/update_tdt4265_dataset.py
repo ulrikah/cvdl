@@ -77,9 +77,12 @@ def download_labels(request_wrapper):
     print("Labels downloaded.")
 
 
-def make_image_symlinks(work_dataset, image_dir):
-    image_source = work_dataset.joinpath("images")
-    image_dir.symlink_to(image_source)
+def make_image_symlinks(work_dataset, target_path):
+    for subset in ["test", "train"]:
+        image_source = work_dataset.joinpath(subset, "images")
+        target_path.joinpath(subset, "images").symlink_to(
+            image_source
+        )
 
 
 def download_images(request_wrapper):
@@ -94,7 +97,8 @@ def download_images(request_wrapper):
     if work_dataset.is_dir():
         print("You are working on a computer with the dataset under work_dataset.")
         print("We're going to copy all image files to your directory")
-        make_image_symlinks(work_dataset, image_dir)
+        make_image_symlinks(work_dataset, dataset_path)
+        return
     zip_path = pathlib.Path("datasets", "tdt4265", "images_mini.zip")
     if not zip_path.is_file():
         print(f"Did not find the image zip file. Go to: {zip_url} and place it at the path: {zip_path}")

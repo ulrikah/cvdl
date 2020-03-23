@@ -14,7 +14,10 @@ if __name__ == "__main__":
     if work_dataset_path.is_dir():
         print("You are working on a computer with the dataset under work_dataset.")
         print("We're going to copy all image files to your directory")
+        print("Dataset setup finished. Extracted to:", dataset_path)
+
         dataset_path.symlink_to(work_dataset_path)
+        exit()
     zip_path = dataset_path.parent.joinpath("waymo.zip")
     if not zip_path.is_file():
         print(f"Did not find the image zip file. Go to: {zip_url} and place it at the path: {zip_path}")

@@ -26,7 +26,7 @@ The dataset consists of a large range of sensor data, such as LIDAR, cameras, an
     - Run the file `python3 setup_waymo.py`
     - For the TDT4265 server and cybele computers, the dataset is locally available and the script will automatically setup the dataset.
     - For local computers, the script will download the dataset. Then it will set up everything.
-- Change the following variables in the config file (This is already done in [train_waymo.yml](../configs/train_waymo.yml)):
+- Change the following variables in the config file (This is already done in [train_waymo.yaml](../configs/train_waymo.yaml)):
 ```
 DATASETS:
     TRAIN: ("waymo_train",)
@@ -50,7 +50,7 @@ To take a peek at the dataset, take a look at [visualize_dataset.ipynb](../visua
     - **REQUIRED TO READ** For the TDT4265 server and cybele computers, the dataset is locally available and the script will automatically setup the dataset.
     - This will take some time on computers that are not provided by us, since you need to download the dataset (which is about 5GB).
     - We recommend you to **run this file once in a while**, since labels will be automatically updated as students annotate more data.
-- Change the following variables in the config file (This is already done in [train_tdt4265.yml](../configs/train_tdt4265.yml)):
+- Change the following variables in the config file (This is already done in [train_tdt4265.yaml](../configs/train_tdt4265.yaml)):
 ```
 DATASETS:
     TRAIN: ("tdt4265_train",)
