@@ -410,3 +410,5 @@ class PhotometricDistort(object):
             distort = Compose(self.pd[1:])
         im, boxes, labels = distort(im, boxes, labels)
         return self.rand_light_noise(im, boxes, labels)
+
+
