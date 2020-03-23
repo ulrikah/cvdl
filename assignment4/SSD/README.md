@@ -22,7 +22,7 @@ pip install -r requirements.txt
 ```
 If you are on the Cybele/tulipan computers, use:
 ```
-pip install -r --user requirements.txt
+pip install --user -r requirements.txt
 ```
 
 The environment is already fixed on the tdt4265.idi.ntnu.no server!
