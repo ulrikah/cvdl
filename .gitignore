@@ -1,4 +1,6 @@
 data/
+assignment4/SSD/datasets
+assignment4/SSD/demo/*/result/
 .nfs*
 .vscode
 *.png
