@@ -30,7 +30,7 @@ From the highlighted drop-down menu, assign the task to your username. This will
 These are the labels that you are supposed to be annotating: 
 
 * person
-* car
+* sign
 * vehicle
 * cyclist
 
