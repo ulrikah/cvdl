@@ -53,7 +53,7 @@ def get_detections(cfg, ckpt):
     check_all_images_exists(labels, image_paths)
     for i, image_path in enumerate(tqdm.tqdm(image_paths, desc="Inference on images")):
         image_detections = {
-            "image_id": image_path.stem,
+            "image_id": int(image_path.stem),
             "bounding_boxes": []
         }
         image = np.array(Image.open(image_path).convert("RGB"))
