@@ -1,10 +1,10 @@
-import time
 import pathlib
 import torch
+import tqdm
 from PIL import Image
 from vizer.draw import draw_boxes
 from ssd.config.defaults import cfg
-from ssd.data.datasets import COCODataset, VOCDataset, MNISTDetection
+from ssd.data.datasets import COCODataset, VOCDataset, MNISTDetection, TDT4265Dataset, WaymoDataset
 import argparse
 import numpy as np
 from ssd import torch_utils
@@ -21,6 +21,10 @@ def run_demo(cfg, ckpt, score_threshold, images_dir: pathlib.Path, output_dir: p
         class_names = COCODataset.class_names
     elif dataset_type == "mnist":
         class_names = MNISTDetection.class_names
+    elif dataset_type == "tdt4265":
+        class_names = TDT4265Dataset.class_names
+    elif dataset_type == "waymo":
+        class_names = WaymoDataset.class_names
     else:
         raise NotImplementedError('Not implemented now.')
 
@@ -38,18 +42,14 @@ def run_demo(cfg, ckpt, score_threshold, images_dir: pathlib.Path, output_dir: p
     transforms = build_transforms(cfg, is_train=False)
     model.eval()
     drawn_images = []
-    for i, image_path in enumerate(image_paths):
-        start = time.time()
-        image_name = image_path.name
+    for i, image_path in enumerate(tqdm.tqdm(image_paths, desc="Predicting on images")):
+        image_name = image_path.stem
 
         image = np.array(Image.open(image_path).convert("RGB"))
         height, width = image.shape[:2]
         images = transforms(image)[0].unsqueeze(0)
-        load_time = time.time() - start
 
-        start = time.time()
         result = model(torch_utils.to_cuda(images))[0]
-        inference_time = time.time() - start
 
         result = result.resize((width, height)).cpu().numpy()
         boxes, labels, scores = result['boxes'], result['labels'], result['scores']
@@ -68,6 +68,9 @@ def run_demo(cfg, ckpt, score_threshold, images_dir: pathlib.Path, output_dir: p
         drawn_image = draw_boxes(image, boxes, labels, scores, class_names).astype(np.uint8)
         Image.fromarray(drawn_image).save(output_dir / image_name)
         drawn_images.append(drawn_image)
+        im = Image.fromarray(drawn_image)
+        output_path = output_dir.joinpath(f"{image_name}.png")
+        im.save(output_path)
     return drawn_images
 
 
