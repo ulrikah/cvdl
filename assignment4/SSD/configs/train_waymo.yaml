@@ -3,8 +3,10 @@ MODEL:
     BACKBONE:
         NAME: 'basic'
         PRETRAINED: False
-        OUT_CHANNELS: [128, 256, 128, 128, 64, 64]
-        INPUT_CHANNELS: 3
+        OUT_CHANNELS: [512, 1024, 512, 256, 128, 64]
+        INPUT_CHANNELS: 3 # from the pre-trained ResNet50
+    PRIORS:
+        FEATURE_MAPS: [512, 1024, 512, 256, 128, 64]
 INPUT:
     IMAGE_SIZE: 300
 DATASETS:
@@ -16,7 +18,7 @@ SOLVER:
     GAMMA: 0.1
     BATCH_SIZE: 16
     LR: 1e-3
-OUTPUT_DIR: 'outputs/basic'
+OUTPUT_DIR: 'outputs/waymo'
 DATASET_DIR: "datasets"
 EVAL_STEP: 1000
 MODEL_SAVE_STEP: 1000

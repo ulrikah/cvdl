@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import models 
 
 class BasicModel(torch.nn.Module):
     """
@@ -22,25 +23,22 @@ class BasicModel(torch.nn.Module):
         image_channels = cfg.MODEL.BACKBONE.INPUT_CHANNELS
         self.output_feature_size = cfg.MODEL.PRIORS.FEATURE_MAPS
 
-
         self.layers = nn.ModuleList()
-        
-        # VGG
+
+        # we don't use the FC layer of ResNet
+        resnet = models.resnet34()
         self.layers.append(nn.Sequential(
-            nn.Conv2d(image_channels, 128, kernel_size=3, padding=1, stride=1),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=1),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 128, kernel_size=3, padding=1, stride=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(128, 64, kernel_size=3, padding=1, stride=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(64, self.output_channels[0], kernel_size=3, padding=1, stride=2)
+            resnet.conv1,
+            resnet.bn1,
+            resnet.relu,
+            resnet.maxpool,
+            resnet.layer1,
+            resnet.layer2,
+            resnet.layer3,
+            resnet.layer4
         ))
 
-        # rest of the layers except last one
+        # detection layers
         for i in range(len(self.output_feature_size) - 2):
             self.layers.append(nn.Sequential(
                 nn.ReLU(inplace=True),
@@ -52,8 +50,9 @@ class BasicModel(torch.nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(self.output_channels[-2], self.output_channels[-2], kernel_size=3, stride=1, padding=1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(self.output_channels[-2], self.output_channels[-1], kernel_size=3, stride=1, padding=0)
+            nn.Conv2d(self.output_channels[-2], self.output_channels[-1], kernel_size=3, stride=1, padding=1)
         ))
+
     
     def forward(self, x):
         """
@@ -73,6 +72,7 @@ class BasicModel(torch.nn.Module):
             x = bank(x)
             out_features.append(x)
         for idx, feature in enumerate(out_features):
+            print(feature.shape[1:])
             out_channel = feature.shape[1]
             feature_map_size = feature.shape[2]
             expected_shape = (out_channel, feature_map_size, feature_map_size)
