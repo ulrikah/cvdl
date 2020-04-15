@@ -1,6 +1,7 @@
 from torch import nn
 from ssd.modeling.backbone.vgg import VGG
 from ssd.modeling.backbone.basic import BasicModel
+from ssd.modeling.backbone.resnet import ResNet
 from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
@@ -21,7 +22,7 @@ class SSDDetector(nn.Module):
 
     def forward(self, images, targets=None):
         features = self.backbone(images)
-
+        import pdb; pdb.set_trace()
         detections, detector_losses = self.box_head(features, targets)
         if self.training:
             return detector_losses
@@ -30,9 +31,14 @@ class SSDDetector(nn.Module):
 
 def build_backbone(cfg):
     backbone_name = cfg.MODEL.BACKBONE.NAME
-    print(backbone_name)
     if backbone_name == "basic":
         model = BasicModel(cfg)
+        return model
+    if backbone_name == "resnet":
+        model = ResNet(cfg)
+        if cfg.MODEL.BACKBONE.PRETRAINED:
+            # TO DO: add option for pretraining, in the same way as VGG
+            print("There is no option for a pretrained ResNet backbone yet")
         return model
     if backbone_name == "vgg":
         model = VGG(cfg)

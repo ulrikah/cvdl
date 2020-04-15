@@ -1,11 +1,12 @@
 MODEL:
     NUM_CLASSES: 5
     BACKBONE:
-        NAME: 'basic'
+        NAME: 'resnet'
         PRETRAINED: False
-        OUT_CHANNELS: [128, 256, 128, 128, 64, 64]
+        OUT_CHANNELS: [512, 1024, 512, 256, 128, 64]
         INPUT_CHANNELS: 3
     PRIORS:
+        # FEATURE_MAPS: [[10, 8], [5, 4], [3, 2], [2, 1], [1, 1], [1, 1]]
         FEATURE_MAPS: [[40, 30], [20, 15], [10, 8], [5, 4], [3, 2], [3, 2]]
         STRIDES: [[8, 8], [16, 16], [27, 27], [40, 40], [80, 80], [320, 240]]
 INPUT:
@@ -21,7 +22,7 @@ SOLVER:
     GAMMA: 0.1
     BATCH_SIZE: 16
     LR: 1e-3
-OUTPUT_DIR: 'outputs/waymo_320x240'
+OUTPUT_DIR: 'outputs/waymo_resnet'
 DATASET_DIR: "/work/datasets"
 EVAL_STEP: 100
 MODEL_SAVE_STEP: 100
