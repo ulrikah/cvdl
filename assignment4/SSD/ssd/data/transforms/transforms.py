@@ -4,6 +4,10 @@ import cv2
 import numpy as np
 from numpy import random
 
+# for vizualisation
+import matplotlib.pyplot as plt
+import os
+import glob
 
 def intersect(box_a, box_b):
     max_xy = np.minimum(box_a[:, 2:], box_b[2:])
@@ -116,9 +120,26 @@ class Resize(object):
         self.size = size
 
     def __call__(self, image, boxes=None, labels=None):
-        image = cv2.resize(image, (self.size,
-                                   self.size))
-        return image, boxes, labels
+        if isinstance(self.size, list):
+            w, h = self.size
+        elif isinstance(self. int):
+            w = h = self.size
+
+        reshaped = cv2.resize(image, dsize=(w, h))
+        # self.save_image(image, reshaped)
+        return reshaped, boxes, labels
+    
+    def save_image(self, image, reshaped, save_to="./dumps"):
+        fig = plt.figure()
+        sub = fig.add_subplot(1, 2, 1)
+        plt.imshow(image.astype(np.int8), cmap='gray')
+        sub.set_title("Original")
+        sub = fig.add_subplot(1, 2, 2)
+        imgplot = plt.imshow(reshaped.astype(np.int8), cmap='gray')
+        sub.set_title("Reshaped")
+        
+        plt.savefig(os.path.join(save_to, str(np.random.randint(10000000))))
+
 
 
 class RandomSaturation(object):

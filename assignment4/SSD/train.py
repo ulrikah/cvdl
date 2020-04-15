@@ -70,8 +70,8 @@ def main():
     logger.info("Loaded configuration file {}".format(args.config_file))
     with open(args.config_file, "r") as cf:
         config_str = "\n" + cf.read()
-        logger.info(config_str)
-    logger.info("Running with config:\n{}".format(cfg))
+        # logger.info(config_str)
+    # logger.info("Running with config:\n{}".format(cfg))
 
     model = start_train(cfg)
 
