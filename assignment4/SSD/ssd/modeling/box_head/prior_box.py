@@ -23,29 +23,38 @@ class PriorBox:
         """
         priors = []
         for k, f in enumerate(self.feature_maps):
-            scale = self.image_size / self.strides[k]
-            for i, j in product(range(f), repeat=2):
-                # unit center x,y
-                cx = (j + 0.5) / scale
-                cy = (i + 0.5) / scale
+            if isinstance(self.image_size, list):
+                image_size_w, image_size_h = self.image_size
+            elif isinstance(self.image_size, int):
+                image_size_w = image_size_h = self.image_size
+            scale_w  = image_size_w / self.strides[k][0]
+            scale_h  = image_size_h / self.strides[k][1]
+            for i in range(f[1]): # height
+                for j in range(f[0]): # width
+                    # unit center x,y
+                    cx = (j + 0.5) / scale_w
+                    cy = (i + 0.5) / scale_h
 
-                # small sized square box
-                size = self.min_sizes[k]
-                h = w = size / self.image_size
-                priors.append([cx, cy, w, h])
+                    # small sized square box
+                    size = self.min_sizes[k]
+                    w = size / image_size_w
+                    h = size / image_size_w
+                    priors.append([cx, cy, w, h])
 
-                # big sized square box
-                size = sqrt(self.min_sizes[k] * self.max_sizes[k])
-                h = w = size / self.image_size
-                priors.append([cx, cy, w, h])
+                    # big sized square box
+                    size = sqrt(self.min_sizes[k] * self.max_sizes[k])
+                    w = size / image_size_w
+                    h = size / image_size_w
+                    priors.append([cx, cy, w, h])
 
-                # change h/w ratio of the small sized box
-                size = self.min_sizes[k]
-                h = w = size / self.image_size
-                for ratio in self.aspect_ratios[k]:
-                    ratio = sqrt(ratio)
-                    priors.append([cx, cy, w * ratio, h / ratio])
-                    priors.append([cx, cy, w / ratio, h * ratio])
+                    # change h/w ratio of the small sized box
+                    size = self.min_sizes[k]
+                    w = size / image_size_w
+                    h = size / image_size_w
+                    for ratio in self.aspect_ratios[k]:
+                        ratio = sqrt(ratio)
+                        priors.append([cx, cy, w * ratio, h / ratio])
+                        priors.append([cx, cy, w / ratio, h * ratio])
 
         priors = torch.tensor(priors)
         if self.clip:
