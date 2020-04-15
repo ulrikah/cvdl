@@ -9,8 +9,10 @@ class PostProcessor:
         self.cfg = cfg
         
         # can be int or array, e.g. [320, 240]
-        self.width, self.height = cfg.INPUT.IMAGE_SIZE if isinstance(cfg.INPUT.IMAGE_SIZE, list) \
-                else cfg.INPUT.IMAGE_SIZE, cfg.INPUT.IMAGE_SIZE
+        if isinstance(cfg.INPUT.IMAGE_SIZE, list):
+            self.width, self.height = cfg.INPUT.IMAGE_SIZE
+        elif isinstance(self. int):
+            self.width = self.height = cfg.INPUT.IMAGE_SIZE
 
     def __call__(self, detections):
         batches_scores, batches_boxes = detections
