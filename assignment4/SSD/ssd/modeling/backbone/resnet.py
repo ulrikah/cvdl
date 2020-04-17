@@ -15,17 +15,46 @@ class ResNet(nn.Module):
         # TO DO: 
         # - option for pretraining
         # - option to choose other ResNet variants
-
-        backbone = models.resnet34(pretrained=False)
-        # self.output_channels = [256, 512, 512, 256, 256, 256]
+        # - make add_additional_layers auto-correspond to output size of ResNet
 
         # we don't use the two last layers of ResNet
-        self.layers = nn.Sequential(*list(backbone.children())[:7])
+        resnet = models.resnet34(pretrained=False)
+        self.resnet = nn.Sequential(*list(resnet.children())[:7])
+
+        # NVIDIA's improvements: 
+        # https://github.com/NVIDIA/DeepLearningExamples/blob/master/PyTorch/Detection/SSD/src/model.py
+        conv4_block1 = self.resnet[-1][0]
+        conv4_block1.conv1.stride = (1, 1)
+        conv4_block1.conv2.stride = (1, 1)
+        conv4_block1.downsample[0].stride = (1, 1)
+
+        self.additional_layers = self.add_additional_layers()
+
+    def add_additional_layers(self):
+        layers = nn.ModuleList()
+        # extra SSD layers
+        for i in range(len(self.output_feature_size) - 2):
+            layers.append(nn.Sequential(
+                nn.ReLU(inplace=False),
+                nn.Conv2d(self.output_channels[i], self.output_channels[i], kernel_size=3, stride=1, padding=1),
+                nn.ReLU(inplace=False),
+                nn.Conv2d(self.output_channels[i], self.output_channels[i + 1], kernel_size=3, stride=2, padding=1)
+            ))
+        layers.append(nn.Sequential(
+            nn.ReLU(inplace=False),
+            nn.Conv2d(self.output_channels[-2], self.output_channels[-2], kernel_size=2, stride=1, padding=1),
+            nn.ReLU(inplace=False),
+            nn.Conv2d(self.output_channels[-2], self.output_channels[-1], kernel_size=2, stride=1, padding=0)
+        ))
+
+        return layers
 
     def forward(self, x):
-        features = []
-        for i, layer in enumerate(self.layers):
+        x = self.resnet(x)
+        features = [x]
+        for i, layer in enumerate(self.additional_layers):
             x = layer(x)
-            print(f"Output shape of layer {i}: {x.shape[1:]}")
             features.append(x)
+        for i, x in enumerate(features):
+            print(f"Output shape of layer {i}: {x.shape[1:]}")
         return tuple(features)
