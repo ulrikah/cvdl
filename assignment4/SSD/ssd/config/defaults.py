@@ -65,7 +65,7 @@ cfg.DATASETS.TEST = ()
 # -----------------------------------------------------------------------------
 cfg.DATA_LOADER = CN()
 # Number of data loading threads
-cfg.DATA_LOADER.NUM_WORKERS = 4
+cfg.DATA_LOADER.NUM_WORKERS = 0
 cfg.DATA_LOADER.PIN_MEMORY = True
 
 # ---------------------------------------------------------------------------- #
