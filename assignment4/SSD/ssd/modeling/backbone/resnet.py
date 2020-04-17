@@ -13,12 +13,11 @@ class ResNet(nn.Module):
 
 
         # TO DO: 
-        # - option for pretraining
         # - option to choose other ResNet variants
         # - make add_additional_layers auto-correspond to output size of ResNet
 
         # we don't use the two last layers of ResNet
-        resnet = models.resnet34(pretrained=False)
+        resnet = models.resnet34(pretrained=cfg.MODEL.BACKBONE.PRETRAINED)
         self.resnet = nn.Sequential(*list(resnet.children())[:7])
 
         # NVIDIA's improvements: 

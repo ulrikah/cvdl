@@ -35,9 +35,6 @@ def build_backbone(cfg):
         return model
     if backbone_name == "resnet":
         model = ResNet(cfg)
-        if cfg.MODEL.BACKBONE.PRETRAINED:
-            # TO DO: add option for pretraining, in the same way as VGG
-            print("There is no option for a pretrained ResNet backbone yet")
         return model
     if backbone_name == "vgg":
         model = VGG(cfg)

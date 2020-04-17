@@ -2,7 +2,7 @@ MODEL:
     NUM_CLASSES: 5
     BACKBONE:
         NAME: 'resnet'
-        PRETRAINED: False
+        PRETRAINED: True
         OUT_CHANNELS: [256, 512, 512, 256, 256, 256]
         INPUT_CHANNELS: 3
     PRIORS:
