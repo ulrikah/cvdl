@@ -21,7 +21,6 @@ class SSDDetector(nn.Module):
             f"SSD Head number of parameters: {torch_utils.format_params(self.box_head)}")
 
     def forward(self, images, targets=None):
-        import pdb; pdb.set_trace()
         features = self.backbone(images)
         detections, detector_losses = self.box_head(features, targets)
         if self.training:
