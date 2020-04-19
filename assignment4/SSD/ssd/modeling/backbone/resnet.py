@@ -43,7 +43,7 @@ class ResNet(nn.Module):
             nn.ReLU(inplace=False),
             nn.Conv2d(self.output_channels[-2], self.output_channels[-2], kernel_size=2, stride=1, padding=1),
             nn.ReLU(inplace=False),
-            nn.Conv2d(self.output_channels[-2], self.output_channels[-1], kernel_size=2, stride=1, padding=0)
+            nn.Conv2d(self.output_channels[-2], self.output_channels[-1], kernel_size=(2, 3), stride=2, padding=0)
         ))
 
         return layers
@@ -54,8 +54,7 @@ class ResNet(nn.Module):
         for i, layer in enumerate(self.additional_layers):
             x = layer(x)
             features.append(x)
-        '''
+
         for i, x in enumerate(features):
             print(f"Output shape of layer {i}: {x.shape[1:]}")
-        '''
         return tuple(features)
