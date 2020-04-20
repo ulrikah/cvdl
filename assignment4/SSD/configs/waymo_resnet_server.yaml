@@ -21,7 +21,7 @@ SOLVER:
     GAMMA: 0.1
     BATCH_SIZE: 16
     LR: 1e-3
-OUTPUT_DIR: 'outputs/waymo_resnet'
+OUTPUT_DIR: 'outputs/waymo_resnet_no_maxpool'
 DATASET_DIR: "/work/datasets"
 EVAL_STEP: 1500
 MODEL_SAVE_STEP: 1500

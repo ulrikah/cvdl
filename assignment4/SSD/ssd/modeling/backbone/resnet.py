@@ -18,20 +18,31 @@ class ResNet(nn.Module):
 
         # we don't use the two last layers of ResNet
         resnet = models.resnet34(pretrained=cfg.MODEL.BACKBONE.PRETRAINED)
-        self.resnet = nn.Sequential(*list(resnet.children())[:7])
+        
+        resnet_layers = [
+            resnet.conv1,
+            resnet.bn1,
+            resnet.relu,
+            resnet.layer1,
+            resnet.layer2,
+            resnet.layer3
+        ]
+        self.resnet = nn.Sequential(*resnet_layers)
 
         # NVIDIA's improvements: 
         # https://github.com/NVIDIA/DeepLearningExamples/blob/master/PyTorch/Detection/SSD/src/model.py
+        '''
         conv4_block1 = self.resnet[-1][0]
         conv4_block1.conv1.stride = (1, 1)
         conv4_block1.conv2.stride = (1, 1)
         conv4_block1.downsample[0].stride = (1, 1)
+        '''
 
         self.additional_layers = self.add_additional_layers()
 
+    # extra SSD layers
     def add_additional_layers(self):
         layers = nn.ModuleList()
-        # extra SSD layers
         for i in range(len(self.output_feature_size) - 2):
             layers.append(nn.Sequential(
                 nn.ReLU(inplace=False),
@@ -51,11 +62,12 @@ class ResNet(nn.Module):
     def forward(self, x):
         x = self.resnet(x)
         features = [x]
+
         for i, layer in enumerate(self.additional_layers):
             x = layer(x)
             features.append(x)
-        '''
         for i, x in enumerate(features):
             print(f"Output shape of layer {i}: {x.shape[1:]}")
-        '''
+
+        print("Feature maps", self.output_feature_size)
         return tuple(features)
