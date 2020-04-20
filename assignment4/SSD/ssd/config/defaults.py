@@ -5,7 +5,7 @@ cfg = CN()
 cfg.MODEL = CN()
 cfg.MODEL.META_ARCHITECTURE = 'SSDDetector'
 # match default boxes to any ground truth with jaccard overlap higher than a threshold (0.5)
-cfg.MODEL.THRESHOLD = 0.5
+cfg.MODEL.THRESHOLD = 0.5 #i used 0.4 but i don't know if it's better
 cfg.MODEL.NUM_CLASSES = 21
 # Hard negative mining
 cfg.MODEL.NEG_POS_RATIO = 3
@@ -91,13 +91,13 @@ cfg.TEST.NMS_THRESHOLD = 0.45
 cfg.TEST.CONFIDENCE_THRESHOLD = 0.01
 cfg.TEST.MAX_PER_CLASS = -1
 cfg.TEST.MAX_PER_IMAGE = 100
-cfg.TEST.BATCH_SIZE = 10
+cfg.TEST.BATCH_SIZE = 32
 
 # ---------------------------------------------------------------------------- #
 # Specific test options
 # ---------------------------------------------------------------------------- #
 cfg.EVAL_STEP = 500 # Evaluate dataset every eval_step, disabled when eval_step < 0
 cfg.MODEL_SAVE_STEP = 500 # Save checkpoint every save_step
-cfg.LOG_STEP = 10 # Print logs every log_stepPrint logs every log_step
+cfg.LOG_STEP = 100 # Print logs every log_stepPrint logs every log_step
 cfg.OUTPUT_DIR = "outputs"
 cfg.DATASET_DIR = "datasets"
