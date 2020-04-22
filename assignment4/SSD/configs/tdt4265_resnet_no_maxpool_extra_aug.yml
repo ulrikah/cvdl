@@ -1,0 +1,30 @@
+MODEL:
+    NUM_CLASSES: 5
+    BACKBONE:
+        NAME: 'resnet'
+        PRETRAINED: True
+        OUT_CHANNELS: [256, 512, 512, 256, 256, 256]
+        INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [[40, 30], [20, 15], [10, 8], [5, 4], [3, 2], [1, 1]]
+        STRIDES: [[8, 8], [16, 16], [32, 30], [64, 60], [107, 120], [320, 240]]
+INPUT:
+    IMAGE_SIZE: [320, 240]
+DATASETS:
+    TRAIN: ("tdt4265_train",)
+    TEST: ("tdt4265_val", )
+DATA_LOADER:
+    NUM_WORKERS: 4
+SOLVER:
+    MAX_ITER: 15000
+    LR_STEPS: [5000, 10000]
+    GAMMA: 0.1
+    BATCH_SIZE: 32
+    LR: 2e-3
+    WARMUP_FACTOR: 0.1
+    WARMUP_ITERS: 1000
+OUTPUT_DIR: outputs/tdt4265_resnet_no_maxpool_extra_aug
+DATASET_DIR: "datasets"
+EVAL_STEP: 1000
+MODEL_SAVE_STEP: 1000
+LOG_STEP: 100

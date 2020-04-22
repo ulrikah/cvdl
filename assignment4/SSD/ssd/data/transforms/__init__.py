@@ -14,6 +14,10 @@ def build_transforms(cfg, is_train=True):
             SubtractMeans(cfg.INPUT.PIXEL_MEAN),
             ToTensor(),
         ]
+        # quick way of not using PhotometricDistort on the waymo set
+        if cfg.DATASETS.TRAIN[0].startswith("tdt4265"):
+            transform.insert(3, PhotometricDistort())
+        
     else:
         transform = [
             Resize(cfg.INPUT.IMAGE_SIZE),
