@@ -16,7 +16,7 @@ if __name__ == "__main__":
     new_dir = checkpoint.parent.parent
     new_dir = pathlib.Path(
         checkpoint.parent.parent,
-        checkpoint.parent.stem.replace("_waymo", "") + "_tdt4265"
+        checkpoint.parent.stem.replace("waymo", "tdt4265")
     )
     # Copy new checkpoint
     new_dir.mkdir()
@@ -55,8 +55,10 @@ if __name__ == "__main__":
     with open(new_config_path, "w") as fp:
         fp.writelines(new_config_lines)
     print("New config saved to:", new_config_path)
+    '''
     print("Starting train")
     # Start training
     os.system(f"python train.py {new_config_path}")
     # Generate submission file to submit.
     os.system(f"python submit_results.py {new_config_path}")
+    '''

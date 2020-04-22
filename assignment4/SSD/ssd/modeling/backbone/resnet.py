@@ -66,8 +66,4 @@ class ResNet(nn.Module):
         for i, layer in enumerate(self.additional_layers):
             x = layer(x)
             features.append(x)
-        for i, x in enumerate(features):
-            print(f"Output shape of layer {i}: {x.shape[1:]}")
-
-        print("Feature maps", self.output_feature_size)
         return tuple(features)
