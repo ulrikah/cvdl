@@ -45,6 +45,21 @@ if __name__ == "__main__":
             old = line
             line = '    TEST: ("tdt4265_val", )\n'
             print(f"overwriting: {old} with {line}")
+        if 'MAX_ITER' in line:
+            old = line
+            line = '    MAX_ITER: 15000\n'
+            print(f"overwriting: {old} with {line}")
+        if 'LR_STEPS' in line:
+            old = line
+            line = '    LR_STEPS: [5000, 10000]\n'
+        if 'LR:' in line:
+            old = line
+            line = '    LR: 2e-3\n'
+            print(f"overwriting: {old} with {line}")
+        if 'DATASET_DIR' in line:
+            old = line
+            line = 'DATASET_DIR: "datasets"\n'
+            print(f"overwriting: {old} with {line}")
         if line.startswith('OUTPUT_DIR:'):
             line = f'OUTPUT_DIR: {new_dir}\n'
         
@@ -54,11 +69,12 @@ if __name__ == "__main__":
     new_config_path = pathlib.Path(args.config_file).parent.joinpath(new_dir.stem + ".yml")
     with open(new_config_path, "w") as fp:
         fp.writelines(new_config_lines)
-    print("New config saved to:", new_config_path)
-    '''
-    print("Starting train")
+
+    print("Done transfer learning")
+    print(f"Starting train with configs {new_config_path}")
     # Start training
     os.system(f"python train.py {new_config_path}")
+    '''
     # Generate submission file to submit.
     os.system(f"python submit_results.py {new_config_path}")
     '''
