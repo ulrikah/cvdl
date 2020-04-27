@@ -17,18 +17,22 @@ def dump_frames(video, directory: pathlib.Path):
 
 def infer_video(
         cfg, ckpt, video_path: str, score_threshold: float,
-        dataset_type, output_path):
+        dataset_type, output_path, video_images):
     assert pathlib.Path(video_path).is_file(),\
         f"Did not find video: {video_path}"
     with tempfile.TemporaryDirectory() as cache_dir:
+        if video_images:
+            cache_dir = video_images
         input_image_dir = pathlib.Path(cache_dir, "input_images")
-        input_image_dir.mkdir()
+        input_image_dir.mkdir(exist_ok=True)
+        
         with mp.VideoFileClip(video_path) as video:
             original_fps = video.fps
             dump_frames(video, input_image_dir)
 
         output_image_dir = pathlib.Path(cache_dir, "video_images")
         output_image_dir.mkdir(exist_ok=True)
+        
         run_demo(
             cfg, ckpt,
             score_threshold,
@@ -37,7 +41,7 @@ def infer_video(
             dataset_type)
 
         impaths = list(output_image_dir.glob("*.png"))
-        impaths.sort(key=lambda impath: int(impath.stem))
+        impaths.sort(key=lambda impath: int(impath.stem.strip(".png")))
         impaths = [str(impath) for impath in impaths]
         with mp.ImageSequenceClip(impaths, fps=original_fps) as video:
             video.write_videofile(output_path)
@@ -59,6 +63,7 @@ def main():
         "output_path", type=str,
         help="Output path to save video with detections")
     parser.add_argument("--ckpt", type=str, default=None, help="Trained weights.")
+    parser.add_argument("--video_images", type=str, default=None, help="Output folder for video images")
     parser.add_argument("--score_threshold", type=float, default=0.7)
     parser.add_argument("--dataset_type", default="tdt4265", type=str, help='Specify dataset type. Currently support voc and coco.')
 
@@ -77,7 +82,9 @@ def main():
                 score_threshold=args.score_threshold,
                 video_path=args.video_path,
                 output_path=args.output_path,
-                dataset_type=args.dataset_type)
+                dataset_type=args.dataset_type,
+                video_images=args.video_images
+                )
 
 
 if __name__ == '__main__':

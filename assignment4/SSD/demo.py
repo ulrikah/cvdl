@@ -59,9 +59,9 @@ def run_demo(cfg, ckpt, score_threshold, images_dir: pathlib.Path, output_dir: p
         scores = scores[indices]
         meters = "|".join([
                 'objects {:02d}'.format(len(boxes)),
-                'load {:03d}ms'.format(round(load_time * 1000)),
-                'inference {:03d}ms'.format(round(inference_time * 1000)),
-                'FPS {}'.format(round(1.0 / inference_time))
+                # 'load {:03d}ms'.format(round(load_time * 1000)),
+                # 'inference {:03d}ms'.format(round(inference_time * 1000)),
+                # 'FPS {}'.format(round(1.0 / inference_time))
             ])
         image_name = image_path.name
 
